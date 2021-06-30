@@ -11,7 +11,7 @@
 
     $route = $_REQUEST['route'];
 
-    $output = shell_exec('cd ' . $route . ' && php composer.phar install 2>&1');
+    $output = shell_exec('cd ' . $route . ' && composer install 2>&1');
 
     if(!is_in_str($output, "ErrorException")){
         echo json_encode([
