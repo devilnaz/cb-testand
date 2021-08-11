@@ -43,7 +43,7 @@
             is_in_str($output, "Your branch is") &&
             (is_in_str($output2, "Already") || is_in_str($output2, "remote") || is_in_str($output2, "Updating") || is_in_str($output2, "Fast-forward")) && 
             (is_in_str($output3, "Switched") && !is_in_str($output3, "fatal")) &&
-            (is_in_str($output4, "Merge") || is_in_str($output4, "Already") || is_in_str($output4, "changed") || is_in_str($output4, "Updating")) && !is_in_str($output4, "conflict")  && !is_in_str($output4, "error") && !is_in_str($output4, "not something")
+            (is_in_str($output4, "Merge") || is_in_str($output4, "Already") || is_in_str($output4, "changed") || is_in_str($output4, "Updating")) && !is_in_str($output4, "conflict")  && !is_in_str($output4, " error ") && !is_in_str($output4, "not something")
         ){
             echo json_encode([
                 "ok" => true,
