@@ -1,6 +1,4 @@
 'use strict';
-
-
 class Home extends React.Component {
     constructor(props){
         super(props);
@@ -24,7 +22,7 @@ class Home extends React.Component {
             items: items,
             isLoad: true 
         });
-        $('.spoilers').css('display', 'block');
+        document.querySelector('#spoiler').style.display =  'block';
     }
 
     render(){
@@ -49,6 +47,7 @@ class TestStandList extends React.Component {
             <div className="test_stand_list">
                 <div className="title_list">
                     <div className="stand-name">Наименование</div>
+                    <div className="stand-master">Master</div>
                     <div className="stand-branch">Ветка</div>
                     <div className="stand-controls"></div>
                 </div>
@@ -75,6 +74,7 @@ class TestStandItem extends React.Component {
         this.state = {
             id: this.props.item.id,
             name: this.props.item.name,
+            master: this.props.item.master,
             branch: this.props.item.branch,
             route: this.props.item.route,
             isChange: false,
@@ -244,7 +244,7 @@ class TestStandItem extends React.Component {
                 <div className="stand-name">
                     { this.state.name }
                 </div>
-                <div className="stand-name">
+                <div className="stand-master">
                     { this.state.master }
                 </div>
                 <div className="stand-branch">
@@ -392,7 +392,7 @@ class DropDownButton extends React.Component {
             <div ref={this.wrapperRef} className="dropdown__container">
                 <button
                     onClick={this.showDropDown}
-                > ... </button>
+                ><i class="fas fa-ellipsis-v"></i></button>
                 <ul 
                     style={{
                         display: (this.state.show ? 'block' : 'none'), 

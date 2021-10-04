@@ -1,6 +1,7 @@
 {
     "masters": {
         "jiglipuf": "master",
-        "jiglipuf2": "master"
+        "jiglipuf2": "master",
+        "master": "master"
     }
 }
