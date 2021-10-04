@@ -70,6 +70,7 @@ code {
 
 .stand-branch {
 	display: flex;
+	position: relative;
 	width: 72%;
 	align-items: center;
 	justify-content: flex-start;
@@ -78,6 +79,18 @@ code {
 
 .stand-branch > div {
 	width: 90%;
+}
+
+.preloader-container {
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: rgba(255,255,255,0.7);
 }
 
 input::-webkit-calendar-picker-indicator {
@@ -120,7 +133,7 @@ button {
 	border: 3px solid black;
 	margin-right: -3px;
 	justify-content: center;
-	align-items: auto
+	align-items: center;
 }
 
 button:active {

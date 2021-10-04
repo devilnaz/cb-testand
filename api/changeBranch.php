@@ -1,13 +1,7 @@
 <?php
     header("Access-Control-Allow-Origin: *");
 
-    function is_in_str($str, $substr) {
-        $result = strpos($str, $substr);
-        if ($result === FALSE) // если это действительно FALSE, а не ноль, например 
-            return false;
-        else
-            return true;   
-    }
+    require_once(__DIR__ . '/common.php');
 
     $branch = quotemeta(trim($_REQUEST['branch']));
     $_branch = trim($_REQUEST['branch']);

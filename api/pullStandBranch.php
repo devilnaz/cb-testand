@@ -2,14 +2,12 @@
     header("Access-Control-Allow-Origin: *");
 
     require_once(__DIR__ . '/common.php');
-
+    
     $route = $_REQUEST['route'];
-
-    $output = shell_exec('cd ' . $route . ' && composer install 2>&1');
-
-    if(!is_in_str($output, "ErrorException")){
+    $output = shell_exec('cd ' . $route . ' && git pull 2>&1');
+    if(is_in_str($output, "Already up to date.")){
         echo json_encode([
-            "ok" => true
+            "ok" => true, 
         ]);
     }
     else {
@@ -18,3 +16,5 @@
         ]);
     }
     exit;
+
+    
