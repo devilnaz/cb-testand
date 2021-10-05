@@ -3,6 +3,8 @@
     $stands_master = json_decode((file_get_contents('./config.json') ?: "{ 'masters': {} }"), true)['masters'] ?: [];
 
     function getStandMaster($name){
+        global $stands_master;
+
         return $stands_master[$name] ?: 'master';
     }
 

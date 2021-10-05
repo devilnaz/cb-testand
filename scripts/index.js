@@ -276,14 +276,14 @@ class TestStandItem extends React.Component {
                         title={ this.state.isChange ? "Разместить ветку" :  "Изменить ветку"}
                         onClick={ this.onChangeBranch.bind() }
                         className={ this.state.isChange ? "btn-green" : "" }
-                        disabled={ this.state.branch != "master" && !this.state.isChange }
+                        disabled={ this.state.branch != this.state.master && !this.state.isChange }
                     >   
                        <i className={ this.state.isChange ? "fas fa-arrow-right" : "fas fa-code-branch" }></i>
                     </button>
                     <button 
                         title="Очистить (до master)"
                         onClick={ this.onBackToMaster.bind() }
-                        disabled={ this.state.branch == "master" }
+                        disabled={ this.state.branch == this.state.master }
                     >
                         <i className="fas fa-arrow-left"></i>
                     </button>
@@ -392,7 +392,7 @@ class DropDownButton extends React.Component {
             <div ref={this.wrapperRef} className="dropdown__container">
                 <button
                     onClick={this.showDropDown}
-                ><i class="fas fa-ellipsis-v"></i></button>
+                ><i className="fas fa-ellipsis-v"></i></button>
                 <ul 
                     style={{
                         display: (this.state.show ? 'block' : 'none'), 
