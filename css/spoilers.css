@@ -1,0 +1,57 @@
+#spoiler {
+	display: none;
+	width: 80%;
+	margin: auto;
+    position: relative;
+}
+
+#spoiler div {
+    overflow: hidden;
+    position: relative;
+}
+
+.spoiler__title {
+    z-index: 100;
+    background-color: white;
+    margin-bottom: 5px;
+}
+
+.spoiler__title i {
+    margin-right: 5px;
+}
+
+.spoiler__title span {
+	color: #0b70db;
+	text-decoration: dashed;
+	padding-left: 15px;
+	padding: 0 7px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.spoiler__title:hover span{
+	text-decoration: solid;
+}
+
+.spoiler-block {
+    position: absolute;
+    top: -200px;
+    z-index: 99;
+	border: 1px solid black;
+	padding: 1em 2em;
+	width: 60%;
+    -webkit-transition: .3s ease-in-out;
+    -moz-transition: .3s ease-in-out;
+    -o-transition: .3s ease-in-out;
+    transition: .3s ease-in-out;
+}
+
+.spoiler-block--showed {
+    top: 0;
+}
+
+.route {
+	color: #018db4;
+	font-weight: bold;
+	font-style: italic
+}

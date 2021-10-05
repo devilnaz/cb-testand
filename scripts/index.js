@@ -1,6 +1,4 @@
 'use strict';
-
-
 class Home extends React.Component {
     constructor(props){
         super(props);
@@ -24,7 +22,7 @@ class Home extends React.Component {
             items: items,
             isLoad: true 
         });
-        $('.spoilers').css('display', 'block');
+        document.querySelector('#spoiler').style.display =  'block';
     }
 
     render(){
@@ -49,6 +47,7 @@ class TestStandList extends React.Component {
             <div className="test_stand_list">
                 <div className="title_list">
                     <div className="stand-name">Наименование</div>
+                    <div className="stand-master">Master</div>
                     <div className="stand-branch">Ветка</div>
                     <div className="stand-controls"></div>
                 </div>
@@ -69,11 +68,13 @@ class TestStandItem extends React.Component {
         this.onHandleKeyDown = this.onHandleKeyDown.bind(this);
         this.onChangeBranch = this.onChangeBranch.bind(this);
         this.onBackToMaster = this.onBackToMaster.bind(this);
+        this.onBranchPull = this.onBranchPull.bind(this);
         this.loading = this.loading.bind(this);
         this.getBranchesDataList = this.getBranchesDataList.bind(this);
         this.state = {
             id: this.props.item.id,
             name: this.props.item.name,
+            master: this.props.item.master,
             branch: this.props.item.branch,
             route: this.props.item.route,
             isChange: false,
@@ -200,6 +201,23 @@ class TestStandItem extends React.Component {
         }
     }
 
+    onBranchPull = async () => {
+        this.setState({ loading: true });
+        let data = new FormData();
+        data.append("route", this.state.route);
+        let response = await fetch('./api/pullStandBranch.php', {
+            method: "POST",
+            body: data
+        });
+        let result = await response.json();
+        if(!result.ok){
+            alert('Ошибка при пуле изменений, обратитесь к администратору!');
+        }
+        this.setState({
+            loading: false,
+        });
+    }
+
     loading(value){
         this.setState({
             loading: value
@@ -221,24 +239,13 @@ class TestStandItem extends React.Component {
     }
 
     render() {
-        let btnTitle = "";
-        let btnIconSrc = "";
-        let btnClass = ""; 
-        let btnDisClear = this.state.branch == "master";
-        let btnDisPut = this.state.branch != "master" && !this.state.isChange;
-        if(this.state.isChange){
-            btnTitle = "Разместить ветку"; 
-            btnIconSrc = "./images/share.svg";
-            btnClass = "btn-green"
-        }
-        else {
-            btnTitle = "Изменить ветку";
-            btnIconSrc = "./images/branch.svg";
-        }
         return (
             <div className="stand" key={ this.props.route }>
                 <div className="stand-name">
                     { this.state.name }
+                </div>
+                <div className="stand-master">
+                    { this.state.master }
                 </div>
                 <div className="stand-branch">
                     { 
@@ -262,23 +269,29 @@ class TestStandItem extends React.Component {
                             )
                             : (<a href={ this.state.route } target="_blank">{ this.state.branch }</a>)
                     } 
-                    { this.state.loading ? (<img src="./images/load.gif" />) : "" }
+                    { this.state.loading ? (<div className="preloader-container"><img src="./images/load.gif" /></div>) : "" }
                 </div>
                 <div className="stand-controls">
                     <button 
-                        title={ btnTitle }
+                        title={ this.state.isChange ? "Разместить ветку" :  "Изменить ветку"}
                         onClick={ this.onChangeBranch.bind() }
-                        className={ btnClass }
-                        disabled={ btnDisPut }
-                    >
-                        <img src={ btnIconSrc } alt="Разместить ветку" />
+                        className={ this.state.isChange ? "btn-green" : "" }
+                        disabled={ this.state.branch != this.state.master && !this.state.isChange }
+                    >   
+                       <i className={ this.state.isChange ? "fas fa-arrow-right" : "fas fa-code-branch" }></i>
                     </button>
                     <button 
-                        title="Очистить"
+                        title="Очистить (до master)"
                         onClick={ this.onBackToMaster.bind() }
-                        disabled={ btnDisClear }
+                        disabled={ this.state.branch == this.state.master }
                     >
-                        <img src="./images/delete.svg" alt="Очистить" />
+                        <i className="fas fa-arrow-left"></i>
+                    </button>
+                    <button 
+                        title="Обновить (Pull)"
+                        onClick={ this.onBranchPull.bind() }
+                    >
+                        <i className="fas fa-sync-alt"></i>
                     </button>
                     <DropDownButton 
                         branch={this.state.branch}
@@ -379,7 +392,7 @@ class DropDownButton extends React.Component {
             <div ref={this.wrapperRef} className="dropdown__container">
                 <button
                     onClick={this.showDropDown}
-                > ... </button>
+                ><i className="fas fa-ellipsis-v"></i></button>
                 <ul 
                     style={{
                         display: (this.state.show ? 'block' : 'none'), 

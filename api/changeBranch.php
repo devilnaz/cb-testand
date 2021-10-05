@@ -1,27 +1,22 @@
 <?php
     header("Access-Control-Allow-Origin: *");
 
-    function is_in_str($str, $substr) {
-        $result = strpos($str, $substr);
-        if ($result === FALSE) // если это действительно FALSE, а не ноль, например 
-            return false;
-        else
-            return true;   
-    }
+    require_once(__DIR__ . '/common.php');
 
     $branch = quotemeta(trim($_REQUEST['branch']));
     $_branch = trim($_REQUEST['branch']);
     $route = $_REQUEST['route'];
     $clear = $_REQUEST['clear'];
+    $master = getStandMaster(str_replace($main_route, '', $route));
     if($clear == 1){
-        $output = shell_exec('cd ' . $route . ' && git checkout master && git pull');
+        $output = shell_exec('cd ' . $route . ' && git checkout ' . $master . ' && git pull');
         $output2 = shell_exec('cd ' . $route . ' && git branch -D ' . $branch);
         /*var_dump($output);
         var_dump($output2);*/
         if(is_in_str($output, "Your branch is") && (is_in_str($output2, "Deleted") || is_in_str($output2, "branch"))){
             echo json_encode([
                 "ok" => true,
-                "branch_name" => "master" 
+                "branch_name" => $master 
             ]);
         }
         else {
@@ -31,7 +26,7 @@
         }
         exit;
     } else {
-        $output = shell_exec('cd ' . $route . ' && git checkout master 2>&1'); //"Your branch is"
+        $output = shell_exec('cd ' . $route . ' && git checkout ' . $master . ' 2>&1'); //"Your branch is"
         $output2 = shell_exec('cd ' . $route . ' && git pull -a 2>&1'); //Already || remote
         $output3 = shell_exec('cd ' . $route . ' && git checkout -b testand-' . $branch . ' 2>&1'); //Switched
         $output4 = shell_exec('cd ' . $route . ' && git merge --commit -m "testand-' . $branch . '" origin/' . $branch . ' 2>&1'); //Merge || Already
@@ -58,7 +53,7 @@
                 $output = shell_exec('cd ' . $route . ' && git merge --abort');
             }
 
-            $output2 = shell_exec('cd ' . $route . ' && git checkout master && git pull');
+            $output2 = shell_exec('cd ' . $route . ' && git checkout ' . $master . ' && git pull');
             $output3 = shell_exec('cd ' . $route . ' && git branch -D testand-' . $branch);
             echo json_encode([
                 "ok" => false,
