@@ -269,7 +269,7 @@ class TestStandItem extends React.Component {
                             )
                             : (<a href={ this.state.route } target="_blank">{ this.state.branch }</a>)
                     } 
-                    { this.state.loading ? (<div className="preloader-container"><img src="./images/load.gif" /></div>) : "" }
+                    { this.state.loading ? (<div className="preloader-container"><img src="./assets/images/load.gif" /></div>) : "" }
                 </div>
                 <div className="stand-controls">
                     <button 
