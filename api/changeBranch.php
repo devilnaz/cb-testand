@@ -7,13 +7,13 @@
     $_branch = trim($_REQUEST['branch']);
     $route = $_REQUEST['route'];
     $clear = $_REQUEST['clear'];
-    $master = getStandMaster(str_replace($main_route, '', $route));
+    $master = getStandMaster(str_replace(config('root'), '', $route));
     if($clear == 1){
         $output = shell_exec('cd ' . $route . ' && git checkout ' . $master . ' && git pull');
         $output2 = shell_exec('cd ' . $route . ' && git branch -D ' . $branch);
         /*var_dump($output);
         var_dump($output2);*/
-        if(is_in_str($output, "Your branch is") && (is_in_str($output2, "Deleted") || is_in_str($output2, "branch"))){
+        if(isInStr($output, "Your branch is") && (isInStr($output2, "Deleted") || isInStr($output2, "branch"))){
             echo json_encode([
                 "ok" => true,
                 "branch_name" => $master 
@@ -35,10 +35,10 @@
         var_dump($output3);
         var_dump($output4);*/
         if(
-            is_in_str($output, "Your branch is") &&
-            (is_in_str($output2, "Already") || is_in_str($output2, "remote") || is_in_str($output2, "Updating") || is_in_str($output2, "Fast-forward")) && 
-            (is_in_str($output3, "Switched") && !is_in_str($output3, "fatal")) &&
-            (is_in_str($output4, "Merge") || is_in_str($output4, "Already") || is_in_str($output4, "changed") || is_in_str($output4, "Updating")) && !is_in_str($output4, "conflict")  && !is_in_str($output4, " error ") && !is_in_str($output4, "not something")
+            isInStr($output, "Your branch is") &&
+            (isInStr($output2, "Already") || isInStr($output2, "remote") || isInStr($output2, "Updating") || isInStr($output2, "Fast-forward")) && 
+            (isInStr($output3, "Switched") && !isInStr($output3, "fatal")) &&
+            (isInStr($output4, "Merge") || isInStr($output4, "Already") || isInStr($output4, "changed") || isInStr($output4, "Updating")) && !isInStr($output4, "conflict")  && !isInStr($output4, " error ") && !isInStr($output4, "not something")
         ){
             echo json_encode([
                 "ok" => true,
@@ -48,7 +48,7 @@
         else {
             $log = $output . " ::::: " . $output2 . " ::::: " . $output3 . " ::::: " . $output4;
             $text_error = "Ошибка при размещении ветки! Стенд сброшен до master'а!";
-            if(is_in_str($output4, "conflict")){
+            if(isInStr($output4, "conflict")){
                 $text_error = "Возник конфликт при замещении ветки. Стенд сброшен до master'а!";
                 $output = shell_exec('cd ' . $route . ' && git merge --abort');
             }

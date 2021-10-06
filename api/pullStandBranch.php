@@ -5,7 +5,7 @@
     
     $route = $_REQUEST['route'];
     $output = shell_exec('cd ' . $route . ' && git pull 2>&1');
-    if(is_in_str($output, "Already up to date.")){
+    if(isInStr($output, "Already up to date.")){
         echo json_encode([
             "ok" => true, 
         ]);

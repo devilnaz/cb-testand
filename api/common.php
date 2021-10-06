@@ -1,18 +1,24 @@
 <?php
 
-// Настраиваем глобальные переменные
-// TODO: от глобальных переменных надлежит избавиться, перейдя либо на функцию config(), либо на DI-контейнер
-$main_route = config('root');
-$stands_master = config('masters');
-
-function getStandMaster($name)
+/**
+ * Получить master-ветку для стенда (по имени стенда(папки))
+ * 
+ * @param string $name имя стенда (название его папки)
+ * @return string master-ветка стенда
+ */
+function getStandMaster(string $name): string
 {
-    global $stands_master;
-
-    return $stands_master[$name] ?: 'master';
+    return config('masters')[$name] ?: 'master';
 }
 
-function is_in_str($str, $substr) 
+/**
+ * Функция проверки вхождения подстроки в строку
+ * 
+ * @param string $str    строка
+ * @param string $substr подстрока
+ * @return bool  
+ */
+function isInStr(string $str, string $substr): bool
 {
     $result = strpos($str, $substr);
     if ($result === FALSE) // если это действительно FALSE, а не ноль, например 
