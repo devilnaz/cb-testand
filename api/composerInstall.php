@@ -7,7 +7,7 @@
 
     $output = shell_exec('cd ' . $route . ' && composer install 2>&1');
 
-    if(!is_in_str($output, "ErrorException")){
+    if(!isInStr($output, "ErrorException")){
         echo json_encode([
             "ok" => true
         ]);
