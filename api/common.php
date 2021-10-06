@@ -1,17 +1,39 @@
 <?php
-    $main_route = "../../"; //здесь необходимо прописать путь до папки, где лежат стенды, относительного данного файла
-    $stands_master = json_decode((file_get_contents('./config.json') ?: "{ 'masters': {} }"), true)['masters'] ?: [];
 
-    function getStandMaster($name){
-        global $stands_master;
+// Настраиваем глобальные переменные
+// TODO: от глобальных переменных надлежит избавиться, перейдя либо на функцию config(), либо на DI-контейнер
+$main_route = config('root');
+$stands_master = config('masters');
 
-        return $stands_master[$name] ?: 'master';
+function getStandMaster($name)
+{
+    global $stands_master;
+
+    return $stands_master[$name] ?: 'master';
+}
+
+function is_in_str($str, $substr) 
+{
+    $result = strpos($str, $substr);
+    if ($result === FALSE) // если это действительно FALSE, а не ноль, например 
+        return false;
+    else
+        return true;   
+}
+
+/**
+ * Получить значение конфигурационного параметра
+ * 
+ * @param string $name  имя параметра
+ * @return mixed        значение параметра
+ */
+function config(string $name)
+{
+    static $config = null; 
+    
+    if (is_null($config)) {
+        $config = \json_decode((\file_get_contents('../config/config.json') ?: '{ "masters": {}, "root": "../" }'), true);
     }
 
-    function is_in_str($str, $substr) {
-        $result = strpos($str, $substr);
-        if ($result === FALSE) // если это действительно FALSE, а не ноль, например 
-            return false;
-        else
-            return true;   
-    }
+    return $config[$name];
+}

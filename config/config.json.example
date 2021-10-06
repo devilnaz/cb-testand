@@ -1,4 +1,5 @@
 {
+    "root": "../",
     "masters": {
         "ts_01": "master",
         "ts_02": "master",

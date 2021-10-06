@@ -12,7 +12,7 @@
 
         $stands_master[$name] = $master;
 
-        file_put_contents(__DIR__ . '/config.json', json_encode([ "masters" => $stands_master ], JSON_PRETTY_PRINT));
+        file_put_contents(__DIR__ . '../config/config.json', json_encode([ "masters" => $stands_master ], JSON_PRETTY_PRINT));
     }
 
     echo 1;
