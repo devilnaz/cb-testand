@@ -2,19 +2,19 @@
     header("Access-Control-Allow-Origin: *");
 
     require_once(__DIR__ . '/common.php');
-    
-    $route = $_REQUEST['route'];
-    $output = shell_exec('cd ' . $route . ' && git pull 2>&1');
-    if(isInStr($output, "Already up to date.")){
-        echo json_encode([
-            "ok" => true, 
-        ]);
+
+    if(changeBranch($_REQUEST['route'], 'testand-' . $_REQUEST['branch'], true)['ok']){
+        if(changeBranch($_REQUEST['route'], $_REQUEST['branch'], false)['ok']){
+            echo json_encode([
+                "ok" => true, 
+            ]);
+            exit;
+        }
     }
-    else {
-        echo json_encode([
-            "ok" => false 
-        ]);
-    }
+
+    echo json_encode([
+        "ok" => false 
+    ]);
     exit;
 
     

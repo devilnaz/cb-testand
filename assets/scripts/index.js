@@ -205,6 +205,7 @@ class TestStandItem extends React.Component {
         this.setState({ loading: true });
         let data = new FormData();
         data.append("route", this.state.route);
+        data.append("branch", this.state.branch.indexOf('testand-') === 0 ? this.state.branch.replace('testand-', '') : this.state.branch);
         let response = await fetch('./api/pullStandBranch.php', {
             method: "POST",
             body: data
