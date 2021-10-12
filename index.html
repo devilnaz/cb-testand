@@ -9,14 +9,23 @@
 	<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
 	<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
 	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+	<script src="./assets/lib/vue-3.2.9.global.prod.js"></script>
+	<script src="/assets/lib/vuex-4.0.2.global.prod.js"></script>
 </head>
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
 	<div id="root"></div>
 	<div id="spoiler"></div>
+	<div id="app">
+		<ul>
+			<li v-for="row in rows">{{row}}</li>
+		</ul>
+	</div>
+	<script src="./assets/scripts/test.js"></script>
+	<script src="./assets/scripts/app.js"></script>
 	<script 
 		type="text/babel" 
-		src="./assets/scripts/spoiler.js"
+		src="assets/scripts/spoiler.js"
 	></script>
 	<script 
 		type="text/babel" 

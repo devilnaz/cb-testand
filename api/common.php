@@ -54,8 +54,8 @@ function changeBranch(string $route, string $branch, bool $clear): array
     $master = getStandMaster(str_replace(config('root'), '', $route));
 
     if($clear){
-        $output = shell_exec('cd ' . $route . ' && git checkout ' . $master . ' && git pull');
-        $output2 = shell_exec('cd ' . $route . ' && git branch -D ' . $branch);
+        $output = shell_exec('cd ' . $route . ' && git checkout ' . $master . ' && git pull') ?? "";
+        $output2 = shell_exec('cd ' . $route . ' && git branch -D ' . $branch) ?? "";
         /*var_dump($output);
         var_dump($output2);*/
         if(isInStr($output, "Your branch is") && (isInStr($output2, "Deleted") || isInStr($output2, "branch"))){
