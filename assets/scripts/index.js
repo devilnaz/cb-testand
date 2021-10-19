@@ -233,7 +233,7 @@ class TestStandItem extends React.Component {
             body: data
          });
         let result = await response.json();
-        console.log(result.log);
+        // console.log(result.log);
         this.setState({
             available_branches: result.branches
         })

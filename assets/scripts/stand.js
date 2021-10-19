@@ -9,14 +9,27 @@ const template = `
         <div className="stand-controls"></div>
     </div>
     <div className="stand">
-        <div className="stand-name" v-for="link in $store.getters['getCount']">
-            stand-name {{link}}
+        <div className="stand-name">
+            stand-name 
         </div>
         <div className="stand-master">
             stand-master
         </div>
         <div className="stand-branch">
-            stand-branch
+                
+                <input 
+                    type="text" 
+                    ref='' 
+                    value='' 
+                    placeholder="Ветка" 
+                    onKeyDown=''
+                    onChange='' 
+                    list=''
+                />
+                <datalist id="">
+                   <option v-for="i in allStands" value="">{{ i.branch }}</option>
+                </datalist>
+            
         </div>
         <div className="stand-controls">
             <button 
@@ -41,11 +54,36 @@ const template = `
         </div>
     </div>
 </div>
-`
+`;
+
+const App = {
+    methods: {
+        onChangeBranch() {
+            console.log(22);
+        }
+    },
+    async mounted() {
+        // console.log(this.$store.state.links);
+        // let response = await fetch('http://ts.cbkeys.ru/api/getStandsInfo.php')
+        // let rows = await response.json()
+        // console.log(rows)
+        await this.$store.dispatch("fetchStands");
+        console.log(this.$store.state);
+    },
+    computed: {
+        allStands() {
+            console.log(999);
+            return this.$store.getters.getStands;
+        }
+    },
+    template,
+};
+
 const store = Vuex.createStore({
     state: () => ({
         links: ['link1', 'link2'],
         id: '',
+        stands: [],
         name: [],
         master: '',
         branch: '',
@@ -54,37 +92,28 @@ const store = Vuex.createStore({
         loading: false,
         inputIsSelect: true,
     }),
-    actions: {},
-    mutations: {},
+    actions: {
+        async fetchStands(ctx) {
+            let response = await fetch('http://ts.cbkeys.ru/api/getStandsInfo.php');
+            let rows = await response.json();
+
+            ctx.commit('updateStands', rows);
+        }
+    },
+    mutations: {
+        updateStands(state,rows) {
+            state.stands = rows;
+        }
+    },
     getters: {
-        getCount() {
-            return store.state.links
-        }
+        getStands: state => {
+            console.log('sfg');
+            return state.stands;
+        } 
     }
-  })
-
-const App = {
-    store,
-    data() {
-        return {
-
-        }
-    },
-    methods: {
-        onChangeBranch() {
-            console.log(22);
-        }
-    },
-    async mounted() {
-        console.log(this.$store.state.links);
-        let response = await fetch('http://ts.cbkeys.ru/api/getStandsInfo.php')
-        let rows = response.json()
-        console.log(rows)
-    },
-    template
-}
+  });
 
 Vue.createApp(App)
 .use(store)
-.mount('#app')
+.mount('#app');
 
