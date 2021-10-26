@@ -8,27 +8,31 @@ const template = `
         <div className="stand-branch">Ветка</div>
         <div className="stand-controls"></div>
     </div>
-    <div className="stand">
+    <div className="stand" v-for="stand in allStands">
         <div className="stand-name">
-            stand-name 
+            {{stand.name}} 
         </div>
         <div className="stand-master">
-            stand-master
+            {{stand.master}}
         </div>
         <div className="stand-branch">
-                
-                <input 
+            <div v-if="$store.state.isChange">
+                <input
                     type="text" 
                     ref='' 
                     value='' 
                     placeholder="Ветка" 
                     onKeyDown=''
                     onChange='' 
-                    list=''
+                    list='branches'
                 />
-                <datalist id="">
-                   <option v-for="i in allStands" value="">{{ i.branch }}</option>
+                <datalist id="branches">
+                   <option v-for="branch in allBranches" :value="branch"> {{branch.name}} </option>
                 </datalist>
+            </div>
+            <div v-else>
+                <a href="#">{{stand.route}}</a>
+            </div>
             
         </div>
         <div className="stand-controls">
@@ -63,17 +67,15 @@ const App = {
         }
     },
     async mounted() {
-        // console.log(this.$store.state.links);
-        // let response = await fetch('http://ts.cbkeys.ru/api/getStandsInfo.php')
-        // let rows = await response.json()
-        // console.log(rows)
         await this.$store.dispatch("fetchStands");
-        console.log(this.$store.state);
+        await this.$store.dispatch("fetchBranches");
     },
     computed: {
         allStands() {
-            console.log(999);
             return this.$store.getters.getStands;
+        },
+        allBranches() {
+            return this.$store.getters.getBranches;
         }
     },
     template,
@@ -86,9 +88,9 @@ const store = Vuex.createStore({
         stands: [],
         name: [],
         master: '',
-        branch: '',
+        branches: [],
         route: '',
-        isChange: false,
+        isChange: true                                      ,
         loading: false,
         inputIsSelect: true,
     }),
@@ -96,19 +98,37 @@ const store = Vuex.createStore({
         async fetchStands(ctx) {
             let response = await fetch('http://ts.cbkeys.ru/api/getStandsInfo.php');
             let rows = await response.json();
-
+            console.log(rows);
             ctx.commit('updateStands', rows);
+        },
+        async fetchBranches(ctx) {
+            let data = new FormData();
+            data.append("route", '../ts_01');
+            let response = await fetch('./api/getBranchesDataList.php', { 
+                method: "POST",
+                body: data
+             });
+            //let response = await fetch('http://ts.cbkeys.ru/api/getBranchesDataList.php');
+            //let response = await fetch('http://dev.cb-server.com/clientbase/distr/branches');
+            let branches = await response.json();
+
+            ctx.commit('updateBranches', branches.branches)
         }
     },
     mutations: {
-        updateStands(state,rows) {
+        updateStands(state, rows) {
             state.stands = rows;
+        },
+        updateBranches(state, branches) {
+            state.branches = branches;
         }
     },
     getters: {
         getStands: state => {
-            console.log('sfg');
             return state.stands;
+        },
+        getBranches: state => {
+            return state.branches;
         } 
     }
   });
