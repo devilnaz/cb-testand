@@ -31,16 +31,16 @@ const template = `
                 </datalist>
             </div>
             <div v-else>
-                <a href="#">{{stand.route}}</a>
+                <a href="#">{{stand.master}}</a>
             </div>
             
         </div>
         <div className="stand-controls">
             <button 
                 title="Изменить ветку"
-                @click="this.onChangeBranch"
+                @click="$store.state.isChange ? 'this.onChangeBranch' : 'this.editBranch'"
             >   
-                <i className="fas fa-arrow-right"></i>
+                <i className="fas fa-code-branch"></i>
             </button>
             <button 
                 title="Очистить (до master)"
@@ -63,7 +63,10 @@ const template = `
 const App = {
     methods: {
         onChangeBranch() {
-            console.log(22);
+            console.log('change');
+        },
+        editBranch() {
+            console.log('edit');
         }
     },
     async mounted() {
@@ -90,7 +93,7 @@ const store = Vuex.createStore({
         master: '',
         branches: [],
         route: '',
-        isChange: true                                      ,
+        isChange: false                                      ,
         loading: false,
         inputIsSelect: true,
     }),
