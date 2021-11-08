@@ -1,4 +1,4 @@
-
+const dataPath = ['http://ts.cbkeys.ru/api/getStandsInfo.php', 'http://ts.cbkeys.ru/api/getBranchesDataList.php'];
 
 const template = `
 <div className="test_stand_list">
@@ -10,14 +10,15 @@ const template = `
     </div>
     <div className="stand" v-for="stand in allStands">
         <div className="stand-name">
-            {{stand.name}} 
+            {{stand.name}}
         </div>
         <div className="stand-master">
             {{stand.master}}
         </div>
         <div className="stand-branch">
-            <div v-if="$store.state.isChange">
+            <div v-if="$store.state">
                 <input
+                    :id="stand.name"
                     type="text" 
                     ref='' 
                     value='' 
@@ -25,20 +26,21 @@ const template = `
                     onKeyDown=''
                     onChange='' 
                     list='branches'
+                    style=""
                 />
                 <datalist id="branches">
                    <option v-for="branch in allBranches" :value="branch"> {{branch.name}} </option>
                 </datalist>
+                <a :href="stand.route" style="display: none; " v-bind:id="'link_' + stand.name">link</a>
             </div>
-            <div v-else>
-                <a href="#">{{stand.master}}</a>
-            </div>
+            
             
         </div>
         <div className="stand-controls">
             <button 
                 title="Изменить ветку"
-                @click="$store.state.isChange ? 'this.onChangeBranch' : 'this.editBranch'"
+                @click="choice(stand.name, stand.route)"
+                
             >   
                 <i className="fas fa-code-branch"></i>
             </button>
@@ -59,14 +61,60 @@ const template = `
     </div>
 </div>
 `;
-
+// :class="{ 'btn-green' : $store.state.isChange }"
 const App = {
+    data() {
+        return {
+            valueString: [],
+        }
+    },
     methods: {
         onChangeBranch() {
             console.log('change');
         },
         editBranch() {
             console.log('edit');
+        },
+        valueRecord(event) {
+            console.log(event.target.value);
+            // event.target.value = valueString;
+        },
+        choice(stand, route) {
+            // console.log(stand);
+            const inputBranch = document.getElementById(stand);
+            let data = new FormData();
+            data.append("branch", inputBranch.value.slice(1));
+            data.append("route", route);
+            data.append("clear", 0);
+            let response = fetch('http://ts.cbkeys.ru/api/changeBranch.php', {
+                method: "POST",
+                body: data
+            });
+            
+           console.log(response);
+            if (inputBranch.value !== '') {
+                inputBranch.setAttribute("style", "display: none;");
+                const linkText = document.getElementById('link_' + stand);
+                linkText.setAttribute("style", "display: block; ");
+                linkText.innerHTML = inputBranch.value;
+            }
+            
+            
+            
+
+
+
+
+            // const xClass = false;
+            // event.target.classList.remove('activeItem')
+            // if(this.$store.state.isChange == false) {
+            //     this.$store.state.isChange = true;
+            //     // event.target.classList.add('activeItem')
+            // } else if (this.$store.state.isChange == true) {
+            //     this.$store.state.isChange = false;
+            //     // event.target.classList.add('activeItem')
+            // }
+            
         }
     },
     async mounted() {
@@ -93,13 +141,13 @@ const store = Vuex.createStore({
         master: '',
         branches: [],
         route: '',
-        isChange: false                                      ,
+        isChange: true,
         loading: false,
         inputIsSelect: true,
     }),
     actions: {
         async fetchStands(ctx) {
-            let response = await fetch('http://ts.cbkeys.ru/api/getStandsInfo.php');
+            let response = await fetch(dataPath[0]);
             let rows = await response.json();
             console.log(rows);
             ctx.commit('updateStands', rows);
@@ -107,15 +155,15 @@ const store = Vuex.createStore({
         async fetchBranches(ctx) {
             let data = new FormData();
             data.append("route", '../ts_01');
-            let response = await fetch('./api/getBranchesDataList.php', { 
+            let response = await fetch(dataPath[1], { 
                 method: "POST",
                 body: data
              });
             //let response = await fetch('http://ts.cbkeys.ru/api/getBranchesDataList.php');
             //let response = await fetch('http://dev.cb-server.com/clientbase/distr/branches');
             let branches = await response.json();
-
-            ctx.commit('updateBranches', branches.branches)
+             console.log(branches);
+            ctx.commit('updateBranches', branches.branches);
         }
     },
     mutations: {
@@ -124,7 +172,7 @@ const store = Vuex.createStore({
         },
         updateBranches(state, branches) {
             state.branches = branches;
-        }
+        },
     },
     getters: {
         getStands: state => {
@@ -132,11 +180,10 @@ const store = Vuex.createStore({
         },
         getBranches: state => {
             return state.branches;
-        } 
-    }
+        },
+    },
   });
 
 Vue.createApp(App)
 .use(store)
 .mount('#app');
-
