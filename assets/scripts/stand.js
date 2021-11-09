@@ -8,7 +8,7 @@ const template = `
         <div className="stand-branch">Ветка</div>
         <div className="stand-controls"></div>
     </div>
-    <div className="stand" v-for="stand in allStands">
+    <div className="stand" v-for="(stand, index) in allStands">
         <div className="stand-name">
             {{stand.name}}
         </div>
@@ -16,7 +16,7 @@ const template = `
             {{stand.master}}
         </div>
         <div className="stand-branch">
-            <div v-if="$store.state">
+            <div v-if="stand.status">
                 <input
                     :id="stand.name"
                     type="text" 
@@ -31,19 +31,31 @@ const template = `
                 <datalist id="branches">
                    <option v-for="branch in allBranches" :value="branch"> {{branch.name}} </option>
                 </datalist>
-                <a :href="stand.route" style="display: none; " v-bind:id="'link_' + stand.name">link</a>
             </div>
-            
+            <a v-if="!stand.status" :href="stand.route" :id="'link_' + stand.name">{{stand.branch}}</a>
+            <a  
+                v-if="!stand.status"
+                :href="stand.route"
+                style="display: none;
+                "v-bind:id="'link_' + stand.name"
+            >link</a>
             
         </div>
         <div className="stand-controls">
-            <button 
+            <button
+                v-if="!stand.status" 
                 title="Изменить ветку"
-                @click="choice(stand.name, stand.route)"
-                
+                @click="callNewAction(index)"
             >   
                 <i className="fas fa-code-branch"></i>
             </button>
+            <button
+            v-if="stand.status" 
+            title="Загрузить ветку"
+            @click="choice(stand.name, stand.route, index)"
+        >   
+            <i className="fas fa-arrow-right"></i>
+        </button>
             <button 
                 title="Очистить (до master)"
             >
@@ -61,7 +73,7 @@ const template = `
     </div>
 </div>
 `;
-// :class="{ 'btn-green' : $store.state.isChange }"
+
 const App = {
     data() {
         return {
@@ -69,52 +81,14 @@ const App = {
         }
     },
     methods: {
-        onChangeBranch() {
-            console.log('change');
+        callNewAction(id) {
+            this.$store.dispatch('newAction', id);
         },
-        editBranch() {
-            console.log('edit');
-        },
-        valueRecord(event) {
-            console.log(event.target.value);
-            // event.target.value = valueString;
-        },
-        choice(stand, route) {
-            // console.log(stand);
-            const inputBranch = document.getElementById(stand);
-            let data = new FormData();
-            data.append("branch", inputBranch.value.slice(1));
-            data.append("route", route);
-            data.append("clear", 0);
-            let response = fetch('http://ts.cbkeys.ru/api/changeBranch.php', {
-                method: "POST",
-                body: data
-            });
-            
-           console.log(response);
-            if (inputBranch.value !== '') {
-                inputBranch.setAttribute("style", "display: none;");
-                const linkText = document.getElementById('link_' + stand);
-                linkText.setAttribute("style", "display: block; ");
-                linkText.innerHTML = inputBranch.value;
-            }
-            
-            
-            
-
-
-
-
-            // const xClass = false;
-            // event.target.classList.remove('activeItem')
-            // if(this.$store.state.isChange == false) {
-            //     this.$store.state.isChange = true;
-            //     // event.target.classList.add('activeItem')
-            // } else if (this.$store.state.isChange == true) {
-            //     this.$store.state.isChange = false;
-            //     // event.target.classList.add('activeItem')
-            // }
-            
+        choice(stand, route, id) {
+            console.log(stand, route,  id);
+            const branch = document.getElementById(stand).value;
+            let data = {route, branch, id}
+            this.$store.dispatch('changeBranchAction', data);
         }
     },
     async mounted() {
@@ -134,16 +108,8 @@ const App = {
 
 const store = Vuex.createStore({
     state: () => ({
-        links: ['link1', 'link2'],
-        id: '',
         stands: [],
-        name: [],
-        master: '',
         branches: [],
-        route: '',
-        isChange: true,
-        loading: false,
-        inputIsSelect: true,
     }),
     actions: {
         async fetchStands(ctx) {
@@ -159,20 +125,42 @@ const store = Vuex.createStore({
                 method: "POST",
                 body: data
              });
-            //let response = await fetch('http://ts.cbkeys.ru/api/getBranchesDataList.php');
-            //let response = await fetch('http://dev.cb-server.com/clientbase/distr/branches');
             let branches = await response.json();
              console.log(branches);
             ctx.commit('updateBranches', branches.branches);
+        },
+        newAction({commit}, id) {
+            commit('testMutation', id)
+        },
+        async changeBranchAction({commit}, params) {
+            let data = new FormData();
+            data.append("branch", params.branch);
+            data.append("route", params.route);
+            data.append("clear", 0);
+            let response = await fetch('http://ts.cbkeys.ru/api/changeBranch.php', {
+                method: "POST",
+                body: data
+            });
+            let result = await response.json();
+            console.log(result);
+            params.branch_name = result.branch_name;
+            commit('changeBranche', params);
         }
     },
     mutations: {
+        testMutation(state, id) {
+            state.stands[id] = {...state.stands[id], status: '1'};
+        },
         updateStands(state, rows) {
             state.stands = rows;
         },
         updateBranches(state, branches) {
             state.branches = branches;
         },
+        changeBranche(state, params) {
+            state.stands[params.id] = {...state.stands[params.id], branch: params.branch_name};
+            state.stands[params.id] = {...state.stands[params.id], status: 0};
+        }
     },
     getters: {
         getStands: state => {
