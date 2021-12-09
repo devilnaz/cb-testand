@@ -8,14 +8,14 @@ const template = `
         <div className="stand-branch">Ветка</div>
         <div className="stand-controls"></div>
     </div>
-    <div className="stand" v-for="(stand, index) in allStands">
-        <div className="stand-name">
+    <div class="stand" v-for="(stand, index) in allStands">
+        <div class="stand-name">
             {{stand.name}}
         </div>
-        <div className="stand-master">
+        <div class="stand-master">
             {{stand.master}}
         </div>
-        <div className="stand-branch">
+        <div class="stand-branch">
             <div v-if="stand.status">
                 <input
                     :id="stand.name"
@@ -45,12 +45,14 @@ const template = `
             <button
                 v-if="!stand.status" 
                 title="Изменить ветку"
-                @click="callNewAction(index)"
+                @click="redrawButton(index)"
+                :disabled="stand.branch !== stand.master"
             >   
                 <i className="fas fa-code-branch"></i>
             </button>
             <button
-            v-if="stand.status" 
+            v-if="stand.status"
+            class="btn-green" 
             title="Загрузить ветку"
             @click="choice(stand.name, stand.route, index)"
         >   
@@ -58,16 +60,19 @@ const template = `
         </button>
             <button 
                 title="Очистить (до master)"
+                :disabled="stand.branch == stand.master"
+                @click="onBackToMaster(index)"
             >
                 <i className="fas fa-arrow-left"></i>
             </button>
             <button 
                 title="Обновить (Pull)"
+                @click="onBranchPull(index)"
             >
                 <i className="fas fa-sync-alt"></i>
             </button>
             <DropDownButton 
-                
+
             />
         </div>
     </div>
@@ -81,14 +86,47 @@ const App = {
         }
     },
     methods: {
-        callNewAction(id) {
-            this.$store.dispatch('newAction', id);
+        async onBranchPull(id) {
+            let stand = this.$store.state.stands[id];
+            data = new FormData;
+            data.append('route', stand.route);
+            data.append('branch', stand.branch.indexOf('testand-') === 0 ? stand.branch.replace('testand-', '') : stand.branch);
+            let response = await fetch('http://ts.cbkeys.ru/api/pullStandBranch.php', {
+                method: "POST",
+                body: data
+            });
+            let result = await response.json();
+            console.log(result);
+            if(!result.ok) {
+                alert('Ошибка при пуле изменений, обратитесь к администратору!');
+            }
+        },
+        redrawButton(id) {
+            this.$store.dispatch('redrawButtonAction', id);
         },
         choice(stand, route, id) {
-            console.log(stand, route,  id);
             const branch = document.getElementById(stand).value;
             let data = {route, branch, id}
             this.$store.dispatch('changeBranchAction', data);
+        },
+         async onBackToMaster(id) {
+            console.log(this.$store.state.stands[id]);
+            let stand = this.$store.state.stands[id];
+            data = new FormData;
+            data.append('branch', stand.branch);
+            data.append('route', stand.route);
+            data.append('clear', 1);
+            let response = await fetch('http://ts.cbkeys.ru/api/changeBranch.php', {
+                method: "POST",
+                body: data
+            });
+            let result = await response.json();
+            if(result.ok) {
+                this.$store.dispatch("fetchStands");
+            } else {
+                alert('Ошибка при очистке, обратитесь к администратору!');
+                this.$store.dispatch("fetchStands");
+            }
         }
     },
     async mounted() {
@@ -115,7 +153,6 @@ const store = Vuex.createStore({
         async fetchStands(ctx) {
             let response = await fetch(dataPath[0]);
             let rows = await response.json();
-            console.log(rows);
             ctx.commit('updateStands', rows);
         },
         async fetchBranches(ctx) {
@@ -126,11 +163,10 @@ const store = Vuex.createStore({
                 body: data
              });
             let branches = await response.json();
-             console.log(branches);
             ctx.commit('updateBranches', branches.branches);
         },
-        newAction({commit}, id) {
-            commit('testMutation', id)
+        redrawButtonAction({commit}, id) {
+            commit('redrawButtonMutation', id)
         },
         async changeBranchAction({commit}, params) {
             let data = new FormData();
@@ -142,13 +178,19 @@ const store = Vuex.createStore({
                 body: data
             });
             let result = await response.json();
-            console.log(result);
-            params.branch_name = result.branch_name;
-            commit('changeBranche', params);
+            if(result.ok) {
+                params.branch_name = result.branch_name;
+                commit('changeBranche', params);
+            } else {
+                params.branch_name = 'master';
+                commit('changeBranche', params);
+                alert(result.error);
+            }
+
         }
     },
     mutations: {
-        testMutation(state, id) {
+        redrawButtonMutation(state, id) {
             state.stands[id] = {...state.stands[id], status: '1'};
         },
         updateStands(state, rows) {
