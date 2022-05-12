@@ -5,7 +5,7 @@
 
     $route = $_REQUEST['route'];
 
-    $output = shell_exec('cd ' . $route . ' && composer install 2>&1');
+    $output = shell_exec('cd ' . $route . composer_install());
 
     if(!isInStr($output, "ErrorException")){
         echo json_encode([
@@ -14,7 +14,7 @@
     }
     else {
         echo json_encode([
-            "ok" => false 
+            "ok" => false
         ]);
     }
     exit;

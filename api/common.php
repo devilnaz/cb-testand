@@ -2,7 +2,7 @@
 
 /**
  * Получить master-ветку для стенда (по имени стенда(папки))
- * 
+ *
  * @param string $name имя стенда (название его папки)
  * @return string master-ветка стенда
  */
@@ -13,30 +13,30 @@ function getStandMaster(string $name): string
 
 /**
  * Функция проверки вхождения подстроки в строку
- * 
+ *
  * @param string $str    строка
  * @param string $substr подстрока
- * @return bool  
+ * @return bool
  */
 function isInStr(string $str, string $substr): bool
 {
     $result = strpos($str, $substr);
-    if ($result === FALSE) // если это действительно FALSE, а не ноль, например 
+    if ($result === FALSE) // если это действительно FALSE, а не ноль, например
         return false;
     else
-        return true;   
+        return true;
 }
 
 /**
  * Получить значение конфигурационного параметра
- * 
+ *
  * @param string $name  имя параметра
  * @return mixed        значение параметра
  */
 function config(string $name)
 {
-    static $config = null; 
-    
+    static $config = null;
+
     if (is_null($config)) {
         $config = \json_decode((\file_get_contents('../config/config.json') ?: '{ "masters": {}, "root": "../../" }'), true);
     }
@@ -45,7 +45,7 @@ function config(string $name)
 }
 
 /**
- * 
+ *
  */
 function changeBranch(string $route, string $branch, bool $clear): array
 {
@@ -61,12 +61,12 @@ function changeBranch(string $route, string $branch, bool $clear): array
         if(isInStr($output, "Your branch is") && (isInStr($output2, "Deleted") || isInStr($output2, "branch"))){
             return [
                 "ok" => true,
-                "branch_name" => $master 
+                "branch_name" => $master
             ];
         }
         else {
             return [
-                "ok" => false 
+                "ok" => false
             ];
         }
     } else {
@@ -80,13 +80,13 @@ function changeBranch(string $route, string $branch, bool $clear): array
         var_dump($output4);*/
         if(
             isInStr($output, "Your branch is") &&
-            (isInStr($output2, "Already") || isInStr($output2, "remote") || isInStr($output2, "Updating") || isInStr($output2, "Fast-forward")) && 
+            (isInStr($output2, "Already") || isInStr($output2, "remote") || isInStr($output2, "Updating") || isInStr($output2, "Fast-forward")) &&
             (isInStr($output3, "Switched") && !isInStr($output3, "fatal")) &&
             (isInStr($output4, "Merge") || isInStr($output4, "Already") || isInStr($output4, "changed") || isInStr($output4, "Updating")) && !isInStr($output4, "conflict")  && !isInStr($output4, " error ") && !isInStr($output4, "not something")
         ){
             return [
                 "ok" => true,
-                "branch_name" => "testand-" . $_branch 
+                "branch_name" => "testand-" . $_branch
             ];
         }
         else {
@@ -106,4 +106,9 @@ function changeBranch(string $route, string $branch, bool $clear): array
             ];
         }
     }
+}
+
+function composer_install()
+{
+    return ' && composer install 2>&1 && for DIR in modules/clientbase/*/; do if [ -d $DIR && -e $DIR/composer.json ]; then composer update --working-dir "$DIR"; fi; done';
 }

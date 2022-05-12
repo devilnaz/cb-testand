@@ -6,17 +6,17 @@
     $route = $_REQUEST['route'];
     $master = getStandMaster(str_replace(config('root'), '', $route));
 
-    $output = shell_exec('cd ' . $route . ' && git reset --hard origin/' . $master . ' && git checkout ' . $master . ' && composer install 2>&1');
+    $output = shell_exec('cd ' . $route . ' && git reset --hard origin/' . $master . ' && git checkout ' . $master . composer_install());
 
     if(isInStr($output, "Your branch is up to date with 'origin/" . $master . "'")){
         echo json_encode([
             "ok" => true,
-            "branch_name" => $master 
+            "branch_name" => $master
         ]);
     }
     else {
         echo json_encode([
-            "ok" => false 
+            "ok" => false
         ]);
     }
     exit;
