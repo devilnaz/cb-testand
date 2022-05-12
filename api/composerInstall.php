@@ -9,12 +9,14 @@
 
     if(!isInStr($output, "ErrorException")){
         echo json_encode([
-            "ok" => true
+            "ok" => true,
+            "log" => $output,
         ]);
     }
     else {
         echo json_encode([
-            "ok" => false
+            "ok" => false,
+            "log" => $output,
         ]);
     }
     exit;
