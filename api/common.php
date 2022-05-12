@@ -110,5 +110,10 @@ function changeBranch(string $route, string $branch, bool $clear): array
 
 function composer_install()
 {
-    return ' && composer install 2>&1 && for DIR in modules/clientbase/*/; do if [ -d $DIR && -e $DIR/composer.json ]; then composer update --working-dir "$DIR"; fi; done';
+    return ' && composer install 2>&1 && for DIR in modules/clientbase/*/; do if [[ -d $DIR && -e $DIR/composer.json ]]; then composer install --working-dir "$DIR"; fi; done';
+}
+
+function composer_update()
+{
+    return ' && composer update 2>&1 && for DIR in modules/clientbase/*/; do if [[ -d $DIR && -e $DIR/composer.json ]]; then composer update --working-dir "$DIR"; fi; done';
 }

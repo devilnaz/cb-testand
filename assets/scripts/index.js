@@ -18,9 +18,9 @@ class Home extends React.Component {
                 items.push(row);
             }
         }
-        this.setState({ 
+        this.setState({
             items: items,
-            isLoad: true 
+            isLoad: true
         });
         document.querySelector('#spoiler').style.display =  'block';
     }
@@ -111,10 +111,10 @@ class TestStandItem extends React.Component {
                 body: data
             });
             let result = await response.json();
-            this.setState({ 
-                isChange: false, 
-                branch: result.branch, 
-                inputIsSelect: true 
+            this.setState({
+                isChange: false,
+                branch: result.branch,
+                inputIsSelect: true
             });
         }
     }
@@ -149,16 +149,16 @@ class TestStandItem extends React.Component {
                     body: data
                 });
                 let result_branch = await response_branch.json();
-                this.setState({ 
+                this.setState({
                     isChange: false,
                     loading: false,
-                    inputIsSelect: true, 
-                    branch: result_branch.branch 
+                    inputIsSelect: true,
+                    branch: result_branch.branch
                 });
             }
         }
         else {
-            this.setState({ 
+            this.setState({
                 isChange: true,
                 loading: false
             });
@@ -193,8 +193,8 @@ class TestStandItem extends React.Component {
                 body: data
             });
             let result_branch = await response_branch.json();
-            this.setState({ 
-                loading: false, 
+            this.setState({
+                loading: false,
                 branch: result_branch.branch,
                 inputIsSelect: true,
             });
@@ -228,7 +228,7 @@ class TestStandItem extends React.Component {
     getBranchesDataList = async () => {
         let data = new FormData();
         data.append("route", this.state.route);
-        let response = await fetch('./api/getBranchesDataList.php', { 
+        let response = await fetch('./api/getBranchesDataList.php', {
             method: "POST",
             body: data
          });
@@ -249,52 +249,52 @@ class TestStandItem extends React.Component {
                     { this.state.master }
                 </div>
                 <div className="stand-branch">
-                    { 
+                    {
                         this.state.isChange
                             ? (
                                 <div>
-                                    <input 
-                                        type="text" 
-                                        ref={ this.inputRef } 
-                                        value={ this.state.branch } 
-                                        placeholder="Ветка" 
-                                        onKeyDown={this.onHandleKeyDown} 
-                                        onChange={this.onChangeStateBranch.bind(this)} 
+                                    <input
+                                        type="text"
+                                        ref={ this.inputRef }
+                                        value={ this.state.branch }
+                                        placeholder="Ветка"
+                                        onKeyDown={this.onHandleKeyDown}
+                                        onChange={this.onChangeStateBranch.bind(this)}
                                         list={'stand_'+this.state.name}
                                     />
                                     <datalist id={'stand_'+this.state.name}>
                                         {this.state.available_branches.map((item, key) => (<option key={key} value={item} />))}
                                     </datalist>
                                 </div>
-                                
+
                             )
                             : (<a href={ this.state.route } target="_blank">{ this.state.branch }</a>)
-                    } 
+                    }
                     { this.state.loading ? (<div className="preloader-container"><img src="./assets/images/load.gif" /></div>) : "" }
                 </div>
                 <div className="stand-controls">
-                    <button 
+                    <button
                         title={ this.state.isChange ? "Разместить ветку" :  "Изменить ветку"}
                         onClick={ this.onChangeBranch.bind() }
                         className={ this.state.isChange ? "btn-green" : "" }
                         disabled={ this.state.branch != this.state.master && !this.state.isChange }
-                    >   
+                    >
                        <i className={ this.state.isChange ? "fas fa-arrow-right" : "fas fa-code-branch" }></i>
                     </button>
-                    <button 
+                    <button
                         title="Очистить (до master)"
                         onClick={ this.onBackToMaster.bind() }
                         disabled={ this.state.branch == this.state.master }
                     >
                         <i className="fas fa-arrow-left"></i>
                     </button>
-                    <button 
+                    <button
                         title="Обновить (Pull)"
                         onClick={ this.onBranchPull.bind() }
                     >
                         <i className="fas fa-sync-alt"></i>
                     </button>
-                    <DropDownButton 
+                    <DropDownButton
                         branch={this.state.branch}
                         route={this.state.route}
                         loading={this.loading}
@@ -394,14 +394,14 @@ class DropDownButton extends React.Component {
                 <button
                     onClick={this.showDropDown}
                 ><i className="fas fa-ellipsis-v"></i></button>
-                <ul 
+                <ul
                     style={{
-                        display: (this.state.show ? 'block' : 'none'), 
+                        display: (this.state.show ? 'block' : 'none'),
                     }}
                 >
                     <li onClick={this.hardReset}>Сброс</li>
-                    <li onClick={this.composerUpdate}>Composer update</li>
                     <li onClick={this.composerInstall}>Composer install</li>
+                    <li onClick={this.composerUpdate}>Composer update</li>
                 </ul>
             </div>
         );
