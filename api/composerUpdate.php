@@ -5,7 +5,7 @@
 
     $route = $_REQUEST['route'];
 
-    $output = shell_exec('cd ' . $route . ' && composer update 2>&1');
+    $output = shell_exec('cd ' . $route . composer_update());
 
     if(!isInStr($output, "ErrorException")){
         echo json_encode([
