@@ -1,4 +1,3 @@
-
 const dataPath = ['http://ts.cbkeys.ru/api/getStandsInfo.php', 'http://ts.cbkeys.ru/api/getBranchesDataList.php'];
 
 const template = `
@@ -74,13 +73,13 @@ const template = `
             </button>
 
             <div className="dropdown__container">
-                <button @click=" showDropdownList(index) ">
+                <button>
                   <i className="fas fa-ellipsis-v"></i>
                 </button>
-                <ul v-show="stand.isActive">
-                    <li @click="onBranchReset(index)">Сброс</li>
-                    <li @click="onComposerUpdate(index)">Composer update</li>
-                    <li @click="onComposerInstall(index)">Composer install</li>
+                <ul>
+                    <li>Сброс</li>
+                    <li>Composer update</li>
+                    <li>Composer install</li>
                 </ul>
             </div>
 
@@ -89,13 +88,10 @@ const template = `
 </div>
 `;
 
-{/* <ul class="dropdown_hidden" v-bind:class="{ dropdown_visible : isActive }"></ul> */}
-
 const App = {
     data() {
         return {
             valueString: [],
-            isActive: false
         }
     },
     methods: {
@@ -140,24 +136,7 @@ const App = {
                 alert('Ошибка при очистке, обратитесь к администратору!');
                 this.$store.dispatch("fetchStands");
             }
-        },
-        async showDropdownList(index) {
-
-            if (this.allStands[index].isActive) {
-                this.allStands[index].isActive = false;
-            } else {
-                this.allStands[index].isActive = true;
-            }
-        },
-        async onBranchReset(id) {
-            console.log(id + ' Сброс OK!');
-        },
-        async onComposerUpdate(id) {
-            console.log(id + ' Composer Up OK!');
-        },
-        async onComposerInstall(id) {
-            console.log(id + ' Composer Inst OK!');
-        },
+        }
     },
     async mounted() {
         await this.$store.dispatch("fetchStands");

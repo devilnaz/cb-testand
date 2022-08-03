@@ -196,3 +196,10 @@ button[disabled]:active {
 .dropdown__container > ul > li:hover {
     margin-left: 2px;
 }
+
+.dropdown_hidden {
+	display: none;
+}
+.dropdown_visible {
+	display: block;
+}
