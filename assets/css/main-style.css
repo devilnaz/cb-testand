@@ -1,4 +1,4 @@
-.page__stands {
-  max-width: 1000px;
-  margin: 0px auto;
+.stands__branch-link:visited {
+  color: var(--purple-300) !important;
 }
+/*# sourceMappingURL=main-style.css.map */

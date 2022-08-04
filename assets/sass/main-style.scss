@@ -4,3 +4,14 @@
     // margin: 0px auto;
   }
 }
+
+.stands {
+  &__btn {
+
+  }
+  &__branch-link {
+    &:visited {
+      color: var(--purple-300) !important;
+    }
+  }
+}

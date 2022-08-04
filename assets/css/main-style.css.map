@@ -1,0 +1,9 @@
+{
+    "version": 3,
+    "mappings": "AAWG,AACC,oBADY,AACX,QAAQ,CAAC;EACR,KAAK,EAAE,iBAAiB,CAAC,UAAU;CACpC",
+    "sources": [
+        "../sass/main-style.scss"
+    ],
+    "names": [],
+    "file": "main-style.css"
+}
