@@ -1,10 +1,5 @@
-*
 !api/
 !api/*
-!assets/
-!assets/*
-!assets/*/
-!assets/*/*
 !config/
 !config/*
 !.gitignore
