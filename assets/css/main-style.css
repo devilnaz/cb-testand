@@ -1,3 +1,7 @@
+body {
+  margin: 0;
+}
+
 .stands__branch-link:visited {
   color: var(--purple-300) !important;
 }
