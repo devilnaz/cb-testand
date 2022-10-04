@@ -22,6 +22,7 @@ const standButtons = {
 
   setup({ data }) {
     console.log(data);
+    const checked = Vue.ref(false);
     const styles = {
       button: ['stands__btn', 'stands__btn_change'],
     };
@@ -31,30 +32,30 @@ const standButtons = {
     const menu = Vue.ref();
 
     const items = Vue.ref([
-       
-            {
-              label: 'Сброс',
-              icon: 'pi pi-refresh',
-              command: () => {
-                  toast.add({severity:'success', summary:'Updated', detail:'Data Updated', life: 3000});
-              }
-            },
-            {
-              label: 'Composer install',
-              icon: 'pi pi-times',
-              command: () => {
-                  toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
-              }
-            },
-            {
-              label: 'Composer update',
-              icon: 'pi pi-times',
-              command: () => {
-                  toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
-              }
-            }
+      {
+        label: 'Сброс',
+        icon: 'pi pi-refresh',
+        command: () => {
+            toast.add({severity:'success', summary:'Updated', detail:'Data Updated', life: 3000});
+        }
+      },
+      {
+        label: 'Composer install',
+        icon: 'pi pi-times',
+        command: () => {
+            toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
+        }
+      },
+      {
+        label: 'Composer update',
+        icon: 'pi pi-times',
+        command: () => {
+            toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
+        }
+      }
     ]);
 
+    // changeBranch($event)
     function changeBranch (event) {
       console.log(event.target);
       console.log(event.target.classList.contains('stands__btn_change'));
@@ -70,12 +71,14 @@ const standButtons = {
 
 
     return {
-      styles, items, menu, toggle, save, changeBranch
+      styles, items, menu, toggle, save, changeBranch, checked, isChecked() {
+        return checked.value ? '' : 'pi pi-share-alt';
+      }
     }
   },
   template: /*html*/`
     <span class="p-buttonset">
-        <p-button :class="styles.button" icon="pi pi-share-alt" @click="changeBranch($event)"></p-button>
+        <p-button @click="$emit('someEvent')" @click="checked = !checked" :class="styles.button" :icon="isChecked()" ></p-button>
         <p-button :class="styles.button" icon="pi pi-arrow-left"></p-button>
         <p-button :class="styles.button" icon="pi pi-sync"></p-button>
         <p-button type="button" icon="pi pi-bars" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"></p-button>
@@ -96,6 +99,7 @@ const Table = {
 
   setup(props) {
     const stands = Vue.ref([]);
+    const input = Vue.ref(false);
     
     Vue.onMounted(async () => {
       let response = await fetch('https://ts.cbkeys.ru/api/getStandsInfo.php');
@@ -153,7 +157,8 @@ const Table = {
       styles,
       stands,
       stockClass,
-      standLink
+      standLink,
+      input
     }
   },
 
@@ -179,7 +184,7 @@ const Table = {
         </p-column>
         <p-column field="branch" header="Ветка">
           <template #body="standProps">
-            <a :href="standLink(standProps.data)" :class="styles.branch">
+            <a :href="standLink(standProps.data)" :class="styles.branch" target="_blank">
               {{ standProps.data.branch }}
             </a>
           </template>
@@ -187,8 +192,10 @@ const Table = {
         <p-column field="buttons" header="Кнопки">
           <template #body="standProps">
             <stand-buttons 
+              @some-event='input = !input'
               :data="standProps.data.name == 'tsdb_03' ? undefined : standProps.data"
             ></stand-buttons>
+            <div v-if='input'>input</div>
           </template>
         </p-column>
     </p-datatable>
