@@ -98,13 +98,18 @@ const TwoCell = {
     "p-menu": primevue.menu,
     "p-button": primevue.button,
     "p-toast": primevue.toast,
+    "p-inputtext": primevue.inputtext,
+    "p-autocomplete": primevue.autocomplete
   },
   
-  props: ['standsProp'],
+  props: ['standsProp', 'testItems'],
   
   setup(props) {
     
-    const checked = Vue.ref(false);
+    const chooseBranch = Vue.ref(false);
+    
+    // const selectedItem = Vue.ref();
+    // const filteredItems = Vue.ref();
       
     const toast = useToast();
 
@@ -135,19 +140,71 @@ const TwoCell = {
     ]);
 
     // changeBranch($event)
-    function changeBranch (event) {
-      console.log(event.target);
-      console.log(event.target.classList.contains('stands__btn_change'));
+    function changeBranch(event) {
+      // console.log(event.target);
+      // console.log(event.target.classList.contains('stands__btn_change'));
+      
+      chooseBranch.value = !chooseBranch.value;
+      console.log('chooseBranch.value: ', chooseBranch.value);
+      
+      
     }
     
-    function isChecked () {
-      return checked.value ? 'pi pi-caret-right' : 'pi pi-share-alt';
+    function changeIcon () {
+      return chooseBranch.value ? 'pi pi-caret-right' : 'pi pi-share-alt';
     }
     
     function changeColor () {
-      return checked.value ? 'background-color: var(--blue-400);' : '';
+      return chooseBranch.value ? 'background-color: var(--blue-400);' : '';
     }
+    
+    function changeHidden () {
+      return chooseBranch.value ? 'display: none;' : '';
+    }
+    
+    const countries = Vue.ref([
+        {"name": "Afghanistan", "code": "AF"},
+        {"name": "Åland Islands", "code": "AX"},
+        {"name": "Albania", "code": "AL"},
+        {"name": "Algeria", "code": "DZ"},
+        {"name": "American Samoa", "code": "AS"},
+        {"name": "Andorra", "code": "AD"},
+        {"name": "Angola", "code": "AO"},
+        {"name": "Anguilla", "code": "AI"},
+        {"name": "Antarctica", "code": "AQ"},
+        {"name": "Antigua and Barbuda", "code": "AG"},
+        {"name": "Argentina", "code": "AR"},]);
+    const selectedCountry1 = Vue.ref();
+    const filteredCountries = Vue.ref();
+    
+    const searchCountry = (event) => {
+        setTimeout(() => {
+            if (!event.query.trim().length) {
+                filteredCountries.value = [...countries.value];
+            }
+            else {
+                filteredCountries.value = countries.value.filter((country) => {
+                    return country.name.toLowerCase().startsWith(event.query.toLowerCase());
+                });
+            }
+        }, 250);
+    };
+    
+    // const searchItems = (event) => {
+    //   //in a real application, make a request to a remote url with the query and return filtered results, for demo we filter at client side
+    //   let query = event.query;
+    //   let _filteredItems = [];
 
+    //   for(let i = 0; i < this.testItems.length; i++) {
+    //       let item = this.testItems[i];
+    //       if (item.label.toLowerCase().indexOf(query.toLowerCase()) === 0) {
+    //           _filteredItems.push(item);
+    //       }
+    //   }
+
+    //   filteredItems.value = _filteredItems;
+    // };
+    
     const toggle = (event) => {
         menu.value.toggle(event);
     };
@@ -165,33 +222,62 @@ const TwoCell = {
       button: ['stands__btn', 'stands__btn_change'],
     };
     
-    return { styles, items, menu, toggle, save, changeBranch, checked, isChecked, changeColor };
+    const hiddenStyles = {
+      'display': 'none',
+    };
+    
+    return { 
+      styles,
+      hiddenStyles,
+      items, 
+      menu, 
+      toggle, 
+      save, 
+      changeBranch, 
+      changeIcon, 
+      changeColor, 
+      changeHidden, 
+      chooseBranch,
+      selectedCountry1,
+      filteredCountries,
+      searchCountry, 
+    };
   },
   
   template: /*html*/`
-    <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="styles.branch" target="_blank">
+    <div>
+    <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="styles.branch" :style="chooseBranch.value ? hiddenStyles : ''"  target="_blank">
       {{ standsProp.data.branch }}
     </a>
-    <span class="p-buttonset">
-      <p-button @click.self="changeBranch" @click="$emit('testCkc')" @click="checked = !checked" :class="styles.button" :style="changeColor()" :icon="isChecked()" ></p-button>
-      <p-button :class="styles.button" icon="pi pi-arrow-left"></p-button>
-      <p-button :class="styles.button" icon="pi pi-sync"></p-button>
-      <p-button type="button" icon="pi pi-bars" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"></p-button>
-      <p-menu id="overlay_menu" ref="menu" :model="items" :popup="true">
-      </p-menu>
-    </span>
+    </div>
+    <!--
+    <p-autocomplete v-model="selectedItem" :suggestions="filteredItems" @complete="searchItems" :virtual-scroller-options="{ itemSize: 38 }" optionLabel="label" dropdown></p-autocomplete>
+    -->
+    <p-autocomplete v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name"></p-autocomplete>
+    
+    <div>
+      <span class="p-buttonset">
+        <p-button @click="changeBranch" :class="styles.button" :style="changeColor()" :icon="changeIcon()"></p-button>
+        <p-button :class="styles.button" icon="pi pi-arrow-left"></p-button>
+        <p-button :class="styles.button" icon="pi pi-sync"></p-button>
+        <p-button type="button" icon="pi pi-bars" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"></p-button>
+        <p-menu id="overlay_menu" ref="menu" :model="items" :popup="true">
+        </p-menu>
+      </span>
+    </div>
   `,
 }
 
 const Table = {
   components: {
-    "p-datatable": primevue.datatable,
-    "p-column":    primevue.column,
+    'p-datatable': primevue.datatable,
+    'p-column':    primevue.column,
     'stand-buttons': standButtons,
     'two-cell': TwoCell,
+    "p-autocomplete": primevue.autocomplete
   },
 
-  setup(props) {
+  setup() {
     const stands = Vue.ref([]);
     const input = Vue.ref(false);
     
@@ -217,12 +303,6 @@ const Table = {
         'ml-auto',
         'mr-auto'
       ],
-      branch: [
-        'stands__branch-link',
-        'text-white-alpha-90',
-        'no-underline',
-        'hover:text-purple-200',
-      ],
     };
 
   // Для теста
@@ -233,15 +313,9 @@ const Table = {
             }
         ];
     };
-
-    const standLink = (dataRow) => {
-      // console.log(dataRow);
-      return [
-        'https://ts.cbkeys.ru/' + dataRow.name,
-      ];
-    };
     
 
+    
     return { 
       columns: Vue.computed(() => [
         {field: 'name', header: 'Наименование'},
@@ -252,8 +326,7 @@ const Table = {
       styles,
       stands,
       stockClass,
-      standLink,
-      input
+      input,
     }
   },
 
@@ -270,7 +343,7 @@ const Table = {
         </p-column>
         <p-column>
           <template #body="standProps">
-            <two-cell :stands-prop="standProps">
+            <two-cell :stands-prop="standProps, testItems">
             </two-cell>
           </template>
         </p-column>
@@ -303,6 +376,8 @@ const Table = {
         
       </p-datatable>
     </div>
+    
+    
     
     
   `,
