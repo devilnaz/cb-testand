@@ -105,12 +105,7 @@ const TwoCell = {
   props: ['standsProp', 'testItems'],
   
   setup(props) {
-    
-    const chooseBranch = Vue.ref(false);
-    
-    // const selectedItem = Vue.ref();
-    // const filteredItems = Vue.ref();
-      
+          
     const toast = useToast();
 
     const menu = Vue.ref();
@@ -139,7 +134,6 @@ const TwoCell = {
       }
     ]);
 
-    // changeBranch($event)
     function changeBranch(event) {
       // console.log(event.target);
       // console.log(event.target.classList.contains('stands__btn_change'));
@@ -148,18 +142,6 @@ const TwoCell = {
       console.log('chooseBranch.value: ', chooseBranch.value);
       
       
-    }
-    
-    function changeIcon () {
-      return chooseBranch.value ? 'pi pi-caret-right' : 'pi pi-share-alt';
-    }
-    
-    function changeColor () {
-      return chooseBranch.value ? 'background-color: var(--blue-400);' : '';
-    }
-    
-    function changeHidden () {
-      return chooseBranch.value ? 'display: none;' : '';
     }
     
     const countries = Vue.ref([
@@ -189,22 +171,7 @@ const TwoCell = {
             }
         }, 250);
     };
-    
-    // const searchItems = (event) => {
-    //   //in a real application, make a request to a remote url with the query and return filtered results, for demo we filter at client side
-    //   let query = event.query;
-    //   let _filteredItems = [];
-
-    //   for(let i = 0; i < this.testItems.length; i++) {
-    //       let item = this.testItems[i];
-    //       if (item.label.toLowerCase().indexOf(query.toLowerCase()) === 0) {
-    //           _filteredItems.push(item);
-    //       }
-    //   }
-
-    //   filteredItems.value = _filteredItems;
-    // };
-    
+        
     const toggle = (event) => {
         menu.value.toggle(event);
     };
@@ -212,42 +179,59 @@ const TwoCell = {
         toast.add({severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000});
     };
     
-    const styles = {
+    const chooseBranch = Vue.ref(false);
+    
+    function changeIcon () {
+      return chooseBranch.value ? 'pi pi-caret-right' : 'pi pi-share-alt';
+    }
+    
+    function changeColor () {
+      return chooseBranch.value ? 'background-color: var(--blue-400);' : '';
+    }
+    
+    function changeHidden () {
+      return chooseBranch.value ? 'display: none;' : '';
+    }
+    
+    
+    const styles = Vue.ref({
       branch: [
         'stands__branch-link',
         'text-white-alpha-90',
         'no-underline',
         'hover:text-purple-200',
+        {'hidden-element': chooseBranch.value}
       ],
       button: ['stands__btn', 'stands__btn_change'],
-    };
+    });
     
     const hiddenStyles = {
       'display': 'none',
     };
     
     return { 
-      styles,
-      hiddenStyles,
+      selectedCountry1,
+      filteredCountries,
+      searchCountry,
       items, 
       menu, 
       toggle, 
       save, 
+      styles,
+      hiddenStyles,
       changeBranch, 
       changeIcon, 
       changeColor, 
       changeHidden, 
-      chooseBranch,
-      selectedCountry1,
-      filteredCountries,
-      searchCountry, 
+      chooseBranch, 
     };
   },
   
   template: /*html*/`
     <div>
-    <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="styles.branch" :style="chooseBranch.value ? hiddenStyles : ''"  target="_blank">
+    <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="styles.branch" target="_blank">
       {{ standsProp.data.branch }}
+      {{styles.branch}}
     </a>
     </div>
     <!--
