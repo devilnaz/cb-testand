@@ -20,6 +20,16 @@ body {
   }
 }
 
+.stand {
+  &__cell {
+    display: flex;
+    align-items: center;
+  }
+  &__buttonset {
+    margin-left: auto;
+  }
+}
+.p-autocomplete.hidden-element,
 .hidden-element {
   display: none;
 }

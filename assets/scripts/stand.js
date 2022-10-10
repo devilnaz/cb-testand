@@ -1,7 +1,7 @@
 
 const dataPath = ['http://ts.cbkeys.ru/api/getStandsInfo.php', 'http://ts.cbkeys.ru/api/getBranchesDataList.php'];
 
-const template = `
+const template = /*html*/`
 <div className="test_stand_list">
     <div className="title_list">
         <div className="stand-name">Наименование</div>

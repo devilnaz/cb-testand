@@ -133,29 +133,21 @@ const TwoCell = {
         }
       }
     ]);
-
-    function changeBranch(event) {
-      // console.log(event.target);
-      // console.log(event.target.classList.contains('stands__btn_change'));
-      
-      chooseBranch.value = !chooseBranch.value;
-      console.log('chooseBranch.value: ', chooseBranch.value);
-      
-      
-    }
     
     const countries = Vue.ref([
-        {"name": "Afghanistan", "code": "AF"},
-        {"name": "Åland Islands", "code": "AX"},
-        {"name": "Albania", "code": "AL"},
-        {"name": "Algeria", "code": "DZ"},
-        {"name": "American Samoa", "code": "AS"},
-        {"name": "Andorra", "code": "AD"},
-        {"name": "Angola", "code": "AO"},
-        {"name": "Anguilla", "code": "AI"},
-        {"name": "Antarctica", "code": "AQ"},
-        {"name": "Antigua and Barbuda", "code": "AG"},
-        {"name": "Argentina", "code": "AR"},]);
+      {"name": "Afghanistan", "code": "AF"},
+      {"name": "Åland Islands", "code": "AX"},
+      {"name": "Albania", "code": "AL"},
+      {"name": "Algeria", "code": "DZ"},
+      {"name": "American Samoa", "code": "AS"},
+      {"name": "Andorra", "code": "AD"},
+      {"name": "Angola", "code": "AO"},
+      {"name": "Anguilla", "code": "AI"},
+      {"name": "Antarctica", "code": "AQ"},
+      {"name": "Antigua and Barbuda", "code": "AG"},
+      {"name": "Argentina", "code": "AR"},
+    ]);
+    
     const selectedCountry1 = Vue.ref();
     const filteredCountries = Vue.ref();
     
@@ -181,6 +173,38 @@ const TwoCell = {
     
     const chooseBranch = Vue.ref(false);
     
+    function changeBranch(event) {
+      // console.log(event.target);
+      // console.log(event.target.classList.contains('stands__btn_change'));
+      
+      chooseBranch.value = !chooseBranch.value;
+      console.log('chooseBranch.value: ', chooseBranch.value);
+      styles.hidden[0]['hidden-element'] = chooseBranch.value;
+      // console.log('styles.hidden[0]: ', styles.hidden[0]['hidden-element']);
+      
+      
+    }
+    
+    // const dataList = ref([]);
+    
+    /* Vue.onMounted( async () => {
+      let response = await fetch('http://ts.cbkeys.ru/api/getBranchesDataList.php');
+      let result = await response.json();
+      
+      if (result.length > 0) {
+        console.log(result);
+        
+        
+        // dataList.value = result.map(stand => {
+        //   return {
+        //     name:   stand.name,
+        //     master: stand.master,
+        //     branch: stand.branch,
+        //   }
+        // });
+      }
+    }) */
+    
     function changeIcon () {
       return chooseBranch.value ? 'pi pi-caret-right' : 'pi pi-share-alt';
     }
@@ -193,13 +217,18 @@ const TwoCell = {
       return chooseBranch.value ? 'display: none;' : '';
     }
     
+    function inputSelect (input) {
+      console.log(input);
+    }
     
-    const styles = Vue.ref({
+    const styles = Vue.reactive({
       branch: [
         'stands__branch-link',
         'text-white-alpha-90',
         'no-underline',
         'hover:text-purple-200',
+      ],
+      hidden: [
         {'hidden-element': chooseBranch.value}
       ],
       button: ['stands__btn', 'stands__btn_change'],
@@ -207,6 +236,7 @@ const TwoCell = {
     
     const hiddenStyles = {
       'display': 'none',
+      'hidden-element': chooseBranch.value,
     };
     
     return { 
@@ -224,30 +254,30 @@ const TwoCell = {
       changeColor, 
       changeHidden, 
       chooseBranch, 
+      inputSelect,
     };
   },
   
   template: /*html*/`
-    <div>
-    <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="styles.branch" target="_blank">
-      {{ standsProp.data.branch }}
-      {{styles.branch}}
-    </a>
-    </div>
-    <!--
-    <p-autocomplete v-model="selectedItem" :suggestions="filteredItems" @complete="searchItems" :virtual-scroller-options="{ itemSize: 38 }" optionLabel="label" dropdown></p-autocomplete>
-    -->
-    <p-autocomplete v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name"></p-autocomplete>
-    
-    <div>
-      <span class="p-buttonset">
-        <p-button @click="changeBranch" :class="styles.button" :style="changeColor()" :icon="changeIcon()"></p-button>
-        <p-button :class="styles.button" icon="pi pi-arrow-left"></p-button>
-        <p-button :class="styles.button" icon="pi pi-sync"></p-button>
-        <p-button type="button" icon="pi pi-bars" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"></p-button>
-        <p-menu id="overlay_menu" ref="menu" :model="items" :popup="true">
-        </p-menu>
-      </span>
+    <div class="stand__cell">
+      <div>
+        <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="[styles.branch, styles.hidden]" target="_blank">
+          {{ standsProp.data.branch }}
+        </a>
+      </div>
+      
+      <p-autocomplete @item-select="inputSelect($event)" :class="[chooseBranch ? '' : 'hidden-element']" class="p-inputtext-sm" forceSelection v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name"></p-autocomplete>
+      
+      <div class="stand__buttonset">
+        <span class="p-buttonset">
+          <p-button @click="changeBranch" :class="styles.button" :style="changeColor()" :icon="changeIcon()"></p-button>
+          <p-button :class="styles.button" icon="pi pi-arrow-left"></p-button>
+          <p-button :class="styles.button" icon="pi pi-sync"></p-button>
+          <p-button type="button" icon="pi pi-bars" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"></p-button>
+          <p-menu id="overlay_menu" ref="menu" :model="items" :popup="true">
+          </p-menu>
+        </span>
+      </div>
     </div>
   `,
 }

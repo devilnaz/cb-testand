@@ -1,2 +1,2 @@
-body{margin:0}.stands__branch-link:visited{color:var(--purple-300) !important}.hidden-element{display:none}
+body{margin:0}.stands__branch-link:visited{color:var(--purple-300) !important}.stand__cell{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-align:center;-ms-flex-align:center;align-items:center}.stand__buttonset{margin-left:auto}.p-autocomplete.hidden-element,.hidden-element{display:none}
 /*# sourceMappingURL=main-style.min.css.map */
