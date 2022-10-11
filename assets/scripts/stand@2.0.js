@@ -105,7 +105,7 @@ const TwoCell = {
   props: ['standsProp', 'testItems'],
   
   setup(props) {
-          
+              
     const toast = useToast();
 
     const menu = Vue.ref();
@@ -154,9 +154,11 @@ const TwoCell = {
     const searchCountry = (event) => {
         setTimeout(() => {
             if (!event.query.trim().length) {
-                filteredCountries.value = [...countries.value];
+              console.log('first');
+                filteredCountries.value = [...allDataBranch.value];
             }
             else {
+              console.log('second');
                 filteredCountries.value = countries.value.filter((country) => {
                     return country.name.toLowerCase().startsWith(event.query.toLowerCase());
                 });
@@ -178,32 +180,38 @@ const TwoCell = {
       // console.log(event.target.classList.contains('stands__btn_change'));
       
       chooseBranch.value = !chooseBranch.value;
-      console.log('chooseBranch.value: ', chooseBranch.value);
-      styles.hidden[0]['hidden-element'] = chooseBranch.value;
-      // console.log('styles.hidden[0]: ', styles.hidden[0]['hidden-element']);
       
+      console.log('chooseBranch.value: ', chooseBranch.value);
+      
+      styles.hidden[0]['hidden-element'] = chooseBranch.value;
       
     }
     
-    // const dataList = ref([]);
+    const allDataBranch = Vue.ref([]);
     
-    /* Vue.onMounted( async () => {
-      let response = await fetch('http://ts.cbkeys.ru/api/getBranchesDataList.php');
+    async function getAllBranch() {
+      let data = new FormData();
+      data.append("route", "../tsdb_01");
+      let response = await fetch('https://ts.cbkeys.ru/api/getBranchesDataList.php', {
+          method: "POST",
+          body: data
+      });
       let result = await response.json();
-      
+      console.log(result);
       if (result.length > 0) {
-        console.log(result);
-        
-        
-        // dataList.value = result.map(stand => {
-        //   return {
-        //     name:   stand.name,
-        //     master: stand.master,
-        //     branch: stand.branch,
-        //   }
-        // });
+        // console.log(stands);
+        for (let branch of result.branches) {
+          allDataBranch.value = {
+            label: branch,
+            value: branch,
+          }
+        };
       }
-    }) */
+      console.log('allDataBranch.value: ', allDataBranch.value);
+    }
+    
+    Vue.onMounted(getAllBranch);
+    
     
     function changeIcon () {
       return chooseBranch.value ? 'pi pi-caret-right' : 'pi pi-share-alt';
@@ -218,7 +226,7 @@ const TwoCell = {
     }
     
     function inputSelect (input) {
-      console.log(input);
+      console.log(input.value);
     }
     
     const styles = Vue.reactive({
@@ -265,8 +273,7 @@ const TwoCell = {
           {{ standsProp.data.branch }}
         </a>
       </div>
-      
-      <p-autocomplete @item-select="inputSelect($event)" :class="[chooseBranch ? '' : 'hidden-element']" class="p-inputtext-sm" forceSelection v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name"></p-autocomplete>
+      <p-autocomplete @item-select="inputSelect($event)" :class="[chooseBranch ? '' : 'hidden-element']" class="p-inputtext-sm" forceSelection v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name" completeOnFocus="true"></p-autocomplete>
       
       <div class="stand__buttonset">
         <span class="p-buttonset">
@@ -298,6 +305,7 @@ const Table = {
     Vue.onMounted(async () => {
       let response = await fetch('https://ts.cbkeys.ru/api/getStandsInfo.php');
       let result = await response.json();
+      console.log('result: ', result);
 
       if (result.length > 0) {
         // console.log(stands);
@@ -321,22 +329,14 @@ const Table = {
 
   // Для теста
     const stockClass = (data) => {
-        return [
-            {
-                'class-master': data.master == 'master',
-            }
-        ];
+      return [
+        {
+          'class-master': data.master == 'master',
+        }
+      ];
     };
     
-
-    
-    return { 
-      columns: Vue.computed(() => [
-        {field: 'name', header: 'Наименование'},
-        {field: 'master', header: 'Master'},
-        {field: 'branch', header: 'Ветка'},
-        {field: 'buttons', header: 'Кнопки'}
-      ]),
+    return {
       styles,
       stands,
       stockClass,
@@ -355,7 +355,7 @@ const Table = {
             </div>
           </template>
         </p-column>
-        <p-column>
+        <p-column header="Ветка">
           <template #body="standProps">
             <two-cell :stands-prop="standProps, testItems">
             </two-cell>
@@ -391,7 +391,7 @@ const Table = {
       </p-datatable>
     </div>
     
-    
+    {{allBranch}}
     
     
   `,
