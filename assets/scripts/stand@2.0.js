@@ -70,34 +70,21 @@ const TwoCell = {
     const statusBranch = Vue.ref(1);
     
     function changeBranch(event) {
-      console.log(event.target);
-      // console.log(event.target.classList.contains('stands__btn_change'));
-      
+      // console.log(event.target);
       
       if (statusBranch.value === 1) {
         statusBranch.value = 2;
       } else if (statusBranch.value === 2) {
-        if (event.target.classList.contains('stands__btn_change')) {
-          event.target.setAttribute('disabled', 'disabled');
-        } else {
-          event.target.parentElement.setAttribute('disabled', 'disabled');
-        }
-        // statusBranch.value = 3;
+        statusBranch.value = 3;
       } else if (statusBranch.value === 3) {
+        onBackToMaster();
         statusBranch.value = 1;
       }
       
       console.log(statusBranch.value);
-      
-      
-      // statusBranch.value = !statusBranch.value;
-      // if (statusBranch.value) {
-        
-      // }
-      
-      // console.log('statusBranch.value: ', statusBranch.value);
-      
-      // styles.hidden[0]['hidden-element'] = statusBranch.value;
+    }
+    
+    function placeBranch() {
       
     }
     
@@ -107,8 +94,8 @@ const TwoCell = {
       let data = new FormData();
       data.append("route", "../tsdb_01");
       let response = await fetch('https://ts.cbkeys.ru/api/getBranchesDataList.php', {
-          method: "POST",
-          body: data
+        method: "POST",
+        body: data
       });
       let result = await response.json();
       
@@ -124,44 +111,87 @@ const TwoCell = {
       filteredCountries.value = [...allDataBranch.value];
     };
     
-    async function onBackToMaster(id) {
-        console.log(this.$store.state.stands[id]);
-        let stand = this.$store.state.stands[id];
-        data = new FormData;
-        data.append('branch', stand.branch);
-        data.append('route', stand.route);
-        data.append('clear', 1);
-        let response = await fetch('https://ts.cbkeys.ru/api/changeBranch.php', {
-            method: "POST",
-            body: data
-        });
-        let result = await response.json();
-        if(result.ok) {
-            this.$store.dispatch("fetchStands");
-        } else {
-            alert('Ошибка при очистке, обратитесь к администратору!');
-            this.$store.dispatch("fetchStands");
-        }
+    // Возвращение на ветку master
+    async function onBackToMaster() {
+      // console.log('standsProp.data', props.standsProp);
+      
+      let data = new FormData();
+      data.append("branch", props.standsProp.data.branch);
+      data.append("route", props.standsProp.data.route);
+      data.append("clear", 1);
+      
+      console.log('data: ', data);
+      
+      let response = await fetch('https://ts.cbkeys.ru/api/changeBranch.php', {
+        method: "POST",
+        body: data
+      });
+      let result = await response.json();
+      console.log('result: ', result);
+      
+      if(result.ok){
+        console.log('selectedCountry1: ', selectedCountry1);
+      } else {
+        alert('Ошибка при очистке, обратитесь к администратору!');
+      }
+      
     };
     
+    async function onBranchPull() {
+      
+      let data = new FormData();
+      data.append("route", props.standsProp.data.route);
+      data.append("branch", props.standsProp.data.branch.indexOf('testand-') === 0 ? props.standsProp.data.branch.replace('testand-', '') : props.standsProp.data.branch);
+      let response = await fetch('https://ts.cbkeys.ru/api/pullStandBranch.php', {
+        method: "POST",
+        body: data
+      });
+      let result = await response.json();
+      console.log('result: ', result);
+      
+      if(!result.ok){
+        alert('Ошибка при пуле изменений, обратитесь к администратору!');
+      }
+      
+    };
     
     function changeIcon () {
       if (statusBranch.value === 1) {
-        return 'pi pi-share-alt';
+        return 'pi pi-github';
       } else if (statusBranch.value === 2) {
-        return 'pi pi-caret-right';
+        return 'pi pi-angle-double-right';
+      } else if (statusBranch.value === 3) {
+        return 'pi pi-angle-double-left';
       }
-    }
+    };
     
     function changeColor () {
-      if (statusBranch.value === 2) {
+      if (statusBranch.value === 1) {
+        
+      } else if (statusBranch.value === 2) {
         return 'background-color: var(--blue-400);';
+      }
+    };
+    
+    function changeTitle () {
+      if (statusBranch.value === 1) {
+        return 'Изменить ветку';
+      } else if (statusBranch.value === 2) {
+        return 'Разместить ветку';
+      } else if (statusBranch.value === 3) {
+        return 'Очистить (до master)';
       }
     }
     
-    // function changeHidden () {
-    //   return statusBranch.value == 1 ? 'display: none;' : '';
-    // }
+    /*  async onBranchReset(id) {
+            console.log(id + ' Сброс OK!');
+        },
+        async onComposerUpdate(id) {
+            console.log(id + ' Composer Up OK!');
+        },
+        async onComposerInstall(id) {
+            console.log(id + ' Composer Inst OK!');
+        }, */
     
     function inputSelect (input) {
       console.log(input.value);
@@ -181,18 +211,21 @@ const TwoCell = {
       selectedCountry1,
       filteredCountries,
       searchCountry,
-      items, 
-      menu, 
-      toggle, 
-      save, 
+      items,
+      menu,
+      toggle,
+      save,
       styles,
-      changeBranch, 
-      changeIcon, 
-      changeColor, 
-      // changeHidden, 
-      statusBranch, 
+      changeBranch,
+      changeIcon,
+      changeColor,
+      changeTitle,
+      // changeHidden,
+      statusBranch,
       inputSelect,
-      allDataBranch
+      allDataBranch,
+      onBackToMaster,
+      onBranchPull
     };
   },
   
@@ -204,13 +237,13 @@ const TwoCell = {
         </a>
       </div>
       
-      <p-autocomplete @item-select="inputSelect($event)" :class="[(statusBranch === 1) ? 'hidden-element' : '']" class="p-inputtext-sm" forceSelection v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name" completeOnFocus="true"></p-autocomplete>
+      <p-autocomplete @item-select="inputSelect($event)" :class="[(statusBranch === 1 || statusBranch === 3) ? 'hidden-element' : '']" class="p-inputtext-sm" forceSelection v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name"  completeOnFocus="true"></p-autocomplete>
       
       <div class="stand__buttonset">
         <span class="p-buttonset">
-          <p-button @click="changeBranch" :class="styles.button" :style="changeColor()" :icon="changeIcon()" title="Изменить ветку"></p-button>
-          <p-button :class="styles.button" icon="pi pi-arrow-left" title="Очистить (до master)"></p-button>
-          <p-button :class="styles.button" icon="pi pi-sync" title="Обновить (Pull)"></p-button>
+          <p-button @click="changeBranch" :class="styles.button" :style="changeColor()" :icon="changeIcon()" :title="changeTitle()"></p-button>
+          <!--<p-button :class="styles.button" icon="pi pi-arrow-left" title="Очистить (до master)"></p-button>-->
+          <p-button @click="onBranchPull" :class="styles.button" icon="pi pi-sync" title="Обновить (Pull)"></p-button>
           <p-button type="button" icon="pi pi-bars" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"></p-button>
           <p-menu id="overlay_menu" ref="menu" :model="items" :popup="true">
           </p-menu>
@@ -236,7 +269,7 @@ const Table = {
     Vue.onMounted(async () => {
       let response = await fetch('https://ts.cbkeys.ru/api/getStandsInfo.php');
       let result = await response.json();
-      // console.log('result: ', result);
+      console.log('result: ', result);
 
       if (result.length > 0) {
         // console.log(stands);
@@ -244,6 +277,7 @@ const Table = {
           return {
             name:   stand.name,
             master: stand.master,
+            route:  stand.route,
             branch: stand.branch,
           }
         });
