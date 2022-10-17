@@ -76,6 +76,7 @@ const TwoCell = {
         statusBranch.value = 2;
       } else if (statusBranch.value === 2) {
         statusBranch.value = 3;
+        onBranchPut();
       } else if (statusBranch.value === 3) {
         onBackToMaster();
         statusBranch.value = 1;
@@ -84,12 +85,10 @@ const TwoCell = {
       console.log(statusBranch.value);
     }
     
-    function placeBranch() {
-      
-    }
-    
+    // Хранение всех веток
     const allDataBranch = Vue.ref([]);
     
+    // Получение всех веток
     async function getAllBranch() {
       let data = new FormData();
       data.append("route", "../tsdb_01");
@@ -99,6 +98,7 @@ const TwoCell = {
       });
       let result = await response.json();
       
+      allDataBranch.value = [];
       // console.log(result.branches);
       for (let branch of result.branches) {
         allDataBranch.value.push({
@@ -112,24 +112,22 @@ const TwoCell = {
     };
     
     // Возвращение на ветку master
-    async function onBackToMaster() {
-      // console.log('standsProp.data', props.standsProp);
-      
+    async function onBackToMaster() {      
       let data = new FormData();
-      data.append("branch", props.standsProp.data.branch);
+      data.append("branch", 'testand-' + linkBranchName.value);
       data.append("route", props.standsProp.data.route);
       data.append("clear", 1);
-      
-      console.log('data: ', data);
       
       let response = await fetch('https://ts.cbkeys.ru/api/changeBranch.php', {
         method: "POST",
         body: data
       });
+      
       let result = await response.json();
-      console.log('result: ', result);
+      // console.log('onBackToMaster result: ', result);
       
       if(result.ok){
+        linkBranchName.value = 'master';
         console.log('selectedCountry1: ', selectedCountry1);
       } else {
         alert('Ошибка при очистке, обратитесь к администратору!');
@@ -137,6 +135,30 @@ const TwoCell = {
       
     };
     
+    // Размещение ветки
+    async function onBranchPut() {
+      if (linkBranchName.value !== '') {
+        let data = new FormData();
+        data.append("branch", linkBranchName.value);
+        data.append("route", props.standsProp.data.route);
+        data.append("clear", 0);
+        let response = await fetch('https://ts.cbkeys.ru/api/changeBranch.php', {
+            method: "POST",
+            body: data
+        });
+        let result = await response.json();
+        if(result.ok) {
+            result.branch_name;
+            console.log('result.branch_name: ', result.branch_name);
+        } else {
+            linkBranchName.value = 'master';
+            statusBranch.value = 1;
+            alert(result.error);
+        }
+      }
+    }
+    
+    // Обновление ветки
     async function onBranchPull() {
       
       let data = new FormData();
@@ -183,20 +205,31 @@ const TwoCell = {
       }
     }
     
-    /*  async onBranchReset(id) {
-            console.log(id + ' Сброс OK!');
-        },
-        async onComposerUpdate(id) {
-            console.log(id + ' Composer Up OK!');
-        },
-        async onComposerInstall(id) {
-            console.log(id + ' Composer Inst OK!');
-        }, */
+/*  async onBranchReset(id) {
+        console.log(id + ' Сброс OK!');
+    },
+    async onComposerUpdate(id) {
+        console.log(id + ' Composer Up OK!');
+    },
+    async onComposerInstall(id) {
+        console.log(id + ' Composer Inst OK!');
+    }, */
     
+    // Установка статуса при инициализации
+    Vue.onMounted(() => {
+      if (props.standsProp.data.branch !== 'master') {
+        statusBranch.value = 3;
+      }
+    });
+    
+    // Выбор значения в autocomplete
     function inputSelect (input) {
-      console.log(input.value);
+      console.log('select');
+      linkBranchName.value = input.value.name;
+      statusBranch.value === 3;
     }
     
+    // Список стилей
     const styles = Vue.reactive({
       branch: [
         'stands__branch-link',
@@ -207,7 +240,17 @@ const TwoCell = {
       button: ['stands__btn', 'stands__btn_change'],
     });
     
+    const valFromFunc = () => {
+      return 'new val'
+    }
+    
+    const newValue = Vue.ref('kaijime');
+    
+    // Состояние названия ветки
+    const linkBranchName = Vue.ref(props.standsProp.data.branch);
+    
     return { 
+      linkBranchName,
       selectedCountry1,
       filteredCountries,
       searchCountry,
@@ -225,7 +268,9 @@ const TwoCell = {
       inputSelect,
       allDataBranch,
       onBackToMaster,
-      onBranchPull
+      onBranchPull,
+      valFromFunc,
+      newValue,
     };
   },
   
@@ -233,10 +278,11 @@ const TwoCell = {
     <div class="stand__cell">
       <div>
         <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="[styles.branch, [(statusBranch === 2) ? 'hidden-element' : '']]" target="_blank">
-          {{ standsProp.data.branch }}
+          {{ linkBranchName }}
         </a>
       </div>
       
+      <!--<div :id="valFromFunc()">test6 - {{ valFromFunc() }} - {{ newValue }}</div>-->
       <p-autocomplete @item-select="inputSelect($event)" :class="[(statusBranch === 1 || statusBranch === 3) ? 'hidden-element' : '']" class="p-inputtext-sm" forceSelection v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name"  completeOnFocus="true"></p-autocomplete>
       
       <div class="stand__buttonset">
