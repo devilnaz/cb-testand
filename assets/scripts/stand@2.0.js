@@ -12,34 +12,54 @@ const TwoCell = {
   props: ['standsProp', 'testItems'],
   
   setup(props) {
-              
+    
+    const lang = {
+      message: {
+        error: 'Возникла непредвиденная ошибка, обратитесь к администратору!',
+      }
+    };
+    
     const toast = useToast();
 
     const menu = Vue.ref();
 
+    // Меню кнопок
     const items = Vue.ref([
       {
         label: 'Сброс',
         icon: 'pi pi-refresh',
         command: () => {
-            toast.add({severity:'success', summary:'Updated', detail:'Data Updated', life: 3000});
+          console.log('сброс');
+          onBranchReset();
+          // toast.add({severity:'success', summary:'Updated', detail:'Data Updated', life: 3000});
         }
       },
       {
         label: 'Composer install',
         icon: 'pi pi-times',
         command: () => {
-            toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
+          console.log('install');
+          onComposerInstall();
+          // toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
         }
       },
       {
         label: 'Composer update',
         icon: 'pi pi-times',
         command: () => {
-            toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
+          console.log('update');
+          onComposerUpdate();
+          // toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
         }
       }
     ]);
+    
+    const toggle = (event) => {
+        menu.value.toggle(event);
+    };
+    const save = () => {
+        toast.add({severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000});
+    };
     
     const selectedCountry1 = Vue.ref();
     const filteredCountries = Vue.ref();
@@ -59,16 +79,17 @@ const TwoCell = {
           });
         }
     };
-        
-    const toggle = (event) => {
-        menu.value.toggle(event);
-    };
-    const save = () => {
-        toast.add({severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000});
-    };
     
     const statusBranch = Vue.ref(1);
     
+    // Установка статуса при инициализации
+    Vue.onMounted(() => {
+      if (props.standsProp.data.branch !== 'master') {
+        statusBranch.value = 3;
+      }
+    });
+    
+    // Событие главной кнопки для смены состояния
     function changeBranch(event) {
       // console.log(event.target);
       
@@ -111,8 +132,31 @@ const TwoCell = {
       filteredCountries.value = [...allDataBranch.value];
     };
     
+    // Размещение ветки
+    async function onBranchPut() {
+      if (linkBranchName.value !== '') {
+        let data = new FormData();
+        data.append("branch", linkBranchName.value);
+        data.append("route", props.standsProp.data.route);
+        data.append("clear", 0);
+        let response = await fetch('https://ts.cbkeys.ru/api/changeBranch.php', {
+            method: "POST",
+            body: data
+        });
+        let result = await response.json();
+        if(result.ok) {
+            // console.log('result.branch_name: ', result.branch_name);
+            toast.add({ severity: 'success', summary: 'Размещение ветки', detail: 'Успешное размещение ветки', group: 'bl', life: 3000});
+        } else {
+            linkBranchName.value = 'master';
+            statusBranch.value = 1;
+            toast.add({ severity: 'warn', summary: 'Pull ветки', detail: result.error, group: 'bl', life: 10000});
+        }
+      }
+    }
+    
     // Возвращение на ветку master
-    async function onBackToMaster() {      
+    async function onBackToMaster() {
       let data = new FormData();
       data.append("branch", 'testand-' + linkBranchName.value);
       data.append("route", props.standsProp.data.route);
@@ -135,35 +179,12 @@ const TwoCell = {
       
     };
     
-    // Размещение ветки
-    async function onBranchPut() {
-      if (linkBranchName.value !== '') {
-        let data = new FormData();
-        data.append("branch", linkBranchName.value);
-        data.append("route", props.standsProp.data.route);
-        data.append("clear", 0);
-        let response = await fetch('https://ts.cbkeys.ru/api/changeBranch.php', {
-            method: "POST",
-            body: data
-        });
-        let result = await response.json();
-        if(result.ok) {
-            result.branch_name;
-            console.log('result.branch_name: ', result.branch_name);
-        } else {
-            linkBranchName.value = 'master';
-            statusBranch.value = 1;
-            alert(result.error);
-        }
-      }
-    }
-    
     // Обновление ветки
     async function onBranchPull() {
       
       let data = new FormData();
       data.append("route", props.standsProp.data.route);
-      data.append("branch", props.standsProp.data.branch.indexOf('testand-') === 0 ? props.standsProp.data.branch.replace('testand-', '') : props.standsProp.data.branch);
+      data.append("branch", linkBranchName.value.indexOf('testand-') === 0 ? linkBranchName.value.replace('testand-', '') : linkBranchName.value);
       let response = await fetch('https://ts.cbkeys.ru/api/pullStandBranch.php', {
         method: "POST",
         body: data
@@ -171,12 +192,70 @@ const TwoCell = {
       let result = await response.json();
       console.log('result: ', result);
       
-      if(!result.ok){
-        alert('Ошибка при пуле изменений, обратитесь к администратору!');
+      if(result.ok){
+        toast.add({ severity: 'success', summary: 'Pull ветки', detail: 'Ветка обновлена', group: 'bl', life: 3000});
+      } else {
+        toast.add({ severity: 'warn', summary: 'Pull ветки', detail: lang.message.error, group: 'bl', life: 10000});
       }
       
     };
     
+    // Принудительный сброс до master
+    async function onBranchReset() {
+        let data = new FormData();
+        data.append("route", props.standsProp.data.route);
+        let response = await fetch('https://ts.cbkeys.ru/api/hardReset.php', {
+            method: "POST",
+            body: data
+        });
+        let result = await response.json();
+        console.log(result);
+        
+        if(result.ok){
+          statusBranch.value = 1;
+          toast.add({severity:'success', summary:'Сброс ветки', detail: 'Успешно сброшен до master', group: 'bl', life: 3000});
+        } else {
+          toast.add({severity:'success', summary:'Сброс ветки', detail: lang.message.error, group: 'bl', life: 10000});
+        }
+    }
+    
+    // Обновление composer
+    async function onComposerUpdate () {
+        let data = new FormData();
+        data.append("route", props.standsProp.data.route);
+        let response = await fetch('https://ts.cbkeys.ru/api/composerUpdate.php', {
+            method: "POST",
+            body: data
+        });
+        let result = await response.json();
+        console.log(result.log);
+        
+        if(result.ok){
+          toast.add({severity:'success', summary:'Composer update', detail: 'Успешное обновление', group: 'bl', life: 3000});
+        } else {
+          toast.add({severity:'success', summary:'Composer update', detail: lang.message.error, group: 'bl', life: 10000});
+        }
+    }
+
+    // Установка/обновление зависимостей в composer
+    async function onComposerInstall () {
+        let data = new FormData();
+        data.append("route", props.standsProp.data.route);
+        let response = await fetch('https://ts.cbkeys.ru/api/composerInstall.php', {
+            method: "POST",
+            body: data
+        });
+        let result = await response.json();
+        console.log(result.log);
+        
+        if(result.ok){
+          toast.add({severity:'success', summary:'Composer install', detail: 'Успешная установка зависимостей', group: 'bl', life: 3000});
+        } else {
+          toast.add({severity:'success', summary:'Composer install', detail: lang.message.error, group: 'bl', life: 10000});
+        }
+    }
+    
+    // Изменение иконки для кнопки
     function changeIcon () {
       if (statusBranch.value === 1) {
         return 'pi pi-github';
@@ -187,14 +266,14 @@ const TwoCell = {
       }
     };
     
+    // Изменение цвета кнопки
     function changeColor () {
-      if (statusBranch.value === 1) {
-        
-      } else if (statusBranch.value === 2) {
+      if (statusBranch.value === 2) {
         return 'background-color: var(--blue-400);';
       }
     };
     
+    // Смена атрибута title для кнопок
     function changeTitle () {
       if (statusBranch.value === 1) {
         return 'Изменить ветку';
@@ -205,26 +284,9 @@ const TwoCell = {
       }
     }
     
-/*  async onBranchReset(id) {
-        console.log(id + ' Сброс OK!');
-    },
-    async onComposerUpdate(id) {
-        console.log(id + ' Composer Up OK!');
-    },
-    async onComposerInstall(id) {
-        console.log(id + ' Composer Inst OK!');
-    }, */
-    
-    // Установка статуса при инициализации
-    Vue.onMounted(() => {
-      if (props.standsProp.data.branch !== 'master') {
-        statusBranch.value = 3;
-      }
-    });
-    
     // Выбор значения в autocomplete
     function inputSelect (input) {
-      console.log('select');
+      // console.log('select');
       linkBranchName.value = input.value.name;
       statusBranch.value === 3;
     }
@@ -239,12 +301,6 @@ const TwoCell = {
       ],
       button: ['stands__btn', 'stands__btn_change'],
     });
-    
-    const valFromFunc = () => {
-      return 'new val'
-    }
-    
-    const newValue = Vue.ref('kaijime');
     
     // Состояние названия ветки
     const linkBranchName = Vue.ref(props.standsProp.data.branch);
@@ -263,18 +319,19 @@ const TwoCell = {
       changeIcon,
       changeColor,
       changeTitle,
-      // changeHidden,
       statusBranch,
       inputSelect,
       allDataBranch,
       onBackToMaster,
       onBranchPull,
-      valFromFunc,
-      newValue,
     };
   },
   
   template: /*html*/`
+    <!-- Обозначение для отрисовки сообщений -->
+    <p-toast></p-toast>
+    <p-toast position="bottom-left" group="bl"></p-toast>
+    
     <div class="stand__cell">
       <div>
         <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="[styles.branch, [(statusBranch === 2) ? 'hidden-element' : '']]" target="_blank">
@@ -282,17 +339,15 @@ const TwoCell = {
         </a>
       </div>
       
-      <!--<div :id="valFromFunc()">test6 - {{ valFromFunc() }} - {{ newValue }}</div>-->
       <p-autocomplete @item-select="inputSelect($event)" :class="[(statusBranch === 1 || statusBranch === 3) ? 'hidden-element' : '']" class="p-inputtext-sm" forceSelection v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name"  completeOnFocus="true"></p-autocomplete>
       
       <div class="stand__buttonset">
         <span class="p-buttonset">
           <p-button @click="changeBranch" :class="styles.button" :style="changeColor()" :icon="changeIcon()" :title="changeTitle()"></p-button>
-          <!--<p-button :class="styles.button" icon="pi pi-arrow-left" title="Очистить (до master)"></p-button>-->
           <p-button @click="onBranchPull" :class="styles.button" icon="pi pi-sync" title="Обновить (Pull)"></p-button>
           <p-button type="button" icon="pi pi-bars" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"></p-button>
-          <p-menu id="overlay_menu" ref="menu" :model="items" :popup="true">
-          </p-menu>
+          <!-- Выпадающее меню с кнопками -->
+          <p-menu id="overlay_menu" ref="menu" :model="items" :popup="true"></p-menu>
         </span>
       </div>
     </div>
@@ -303,9 +358,8 @@ const Table = {
   components: {
     'p-datatable': primevue.datatable,
     'p-column':    primevue.column,
-    // 'stand-buttons': standButtons,
-    'two-cell': TwoCell,
-    "p-autocomplete": primevue.autocomplete
+    'two-cell':    TwoCell,
+    'p-autocomplete': primevue.autocomplete
   },
 
   setup() {
