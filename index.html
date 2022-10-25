@@ -2,72 +2,57 @@
 <html>
 <head>
 	<meta charset="utf-8" /> 
-	<title>Test stands clientbase</title>
-	<!--<link rel="stylesheet" href="./assets/css/style.css">
-	<link rel="stylesheet" href="./assets/css/spoilers.css">
-	<link rel="stylesheet" href="./assets/css/all.min.css">
-	 <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-	<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
-	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script> -->
+	<title>Test stands | clientbase</title>
+  
+  <!-- Иконка стр. -->
+  <link rel="icon" href="./assets/lib/fontawesome-free-6.2.0-web/svgs/brands/square-gitlab.svg" type="image/svg+xml">
 
+  <!-- Иконки fontawesome -->
+  <link href="./assets/lib/fontawesome-free-6.2.0-web/css/all.min.css" rel="stylesheet">
   <link href="./assets/css/main-style.css" rel="stylesheet">
 
   <!-- Vue -->
-	<script src="./assets/lib/vue@3.2.30.global.prod.js"></script>
-	<!-- <script src="./assets/lib/vuex-4.0.2.global.prod.js"></script> -->
+	<script src="./assets/lib/vue-3.2.30.global.prod.js"></script>
 
   <!-- PrimeVue -->
-  <!-- <link href="./assets/lib/primevue@3.15.0/themes/mdc-dark-deeppurple/theme.css" rel="stylesheet"> -->
-  <link href="https://unpkg.com/primevue@^3/resources/themes/mdc-dark-deeppurple/theme.css" rel="stylesheet" />
-  <!-- <link href="./assets/lib/primevue@3.15.0/primevue.min.css" rel="stylesheet"> -->
-  <link href="https://unpkg.com/primevue@^3/resources/primevue.min.css" rel="stylesheet" />
-  <!-- <link href="./assets/lib/primeflex@3.2.1/primeflex.min.css" rel="stylesheet" />
-  <link href="./assets/lib/primeicons@5.0.0/primeicons.css" rel="stylesheet"> -->
-  <link href="https://unpkg.com/primeflex@^3/primeflex.min.css" rel="stylesheet" />
-        <link href="https://unpkg.com/primeicons/primeicons.css" rel="stylesheet" />
-  <!-- <script src="./assets/lib/primevue@3.15.0/core/core.min.js"></script> -->
-  <script src="https://unpkg.com/primevue@^3/core/core.min.js"></script>
+  <link href="./assets/lib/primevue/resources/themes/mdc-dark-deeppurple/theme.css" rel="stylesheet">
+  <link href="./assets/lib/primevue/resources/primevue.min.css" rel="stylesheet">
+  <link href="./assets/lib/primeflex/primeflex.min.css" rel="stylesheet" />
+  <link href="./assets/lib/primeicons/primeicons.css" rel="stylesheet">
   
-        <!-- Dependencies -->
-  <script src="https://unpkg.com/primevue@^3/autocomplete/autocomplete.min.js"></script>
-  <!-- Table component -->
-  <script src="https://unpkg.com/primevue@^3/treetable/treetable.min.js"></script>
-  <script src="https://unpkg.com/primevue@^3/datatable/datatable.min.js"></script>
-  <script src="https://unpkg.com/primevue@^3/column/column.min.js"></script>
+  <!-- Dependencies -->
+  <script src="./assets/lib/primevue/core/core.min.js"></script>
+  
+  <!-- Table component -->  
+  <script src="./assets/lib/primevue/components/treetable.min.js"></script>
+  <script src="./assets/lib/primevue/components/datatable.min.js"></script>
+  <script src="./assets/lib/primevue/components/column.min.js"></script>
 
-  <!-- PrimeVue components -->
-  <script src="https://unpkg.com/primevue@^3/splitbutton/splitbutton.min.js"></script>
-  <script src="https://unpkg.com/vue-router@4.0.0/dist/vue-router.global.js"></script>
-        <script src="https://unpkg.com/primevue@^3/toast/toast.min.js"></script>
-        <script src="https://unpkg.com/primevue@^3/toastservice/toastservice.min.js"></script>
+  <!-- PrimeVue components -->  
+  <script src="./assets/lib/primevue/components/autocomplete.min.js"></script>
+  <script src="./assets/lib/primevue/components/splitbutton.min.js"></script>
+  <script src="./assets/lib/primevue/components/toast.min.js"></script>
+  <script src="./assets/lib/primevue/components/toastservice.min.js"></script>
+  <script src="./assets/lib/primevue/components/accordion.min.js"></script>
+  <script src="./assets/lib/primevue/components/accordiontab.min.js"></script>
+  
+  <script type="module" src="./assets/lib/zero-md/zero-md.min.js"></script>
   
 </head>
 <body>
-  <!-- Stand на React -->
-  <!-- <noscript>You need to enable JavaScript to run this app.</noscript>
-	<div id="root"></div>
-	<div id="spoiler"></div>
-
-	<script 
-		type="text/babel" 
-		src="assets/scripts/spoiler.js"
-	></script>
-	<script 
-		type="text/babel" 
-		src="./assets/scripts/index.js"
-	></script> -->
-
-  <!-- Stand на Vue -->
   
+  <!-- Обертка для всей стр. -->
   <div class="page">
-
+    
+    <!-- Stand на Vue -->
     <div id="stands"></div>
-    <script  type="module" src="./assets/scripts/stand@2.0.js"></script>
+    <script type="module" src="./assets/scripts/stand@2.0.js"></script>
+    
+    <!-- Блок с информацией -->
+    <div id="info-markdown"></div>
+    <script type="module" src="./assets/scripts/info-markdown.js"></script>
     
   </div>
-
-	<!-- <div id="app"></div>
-	<script src="./assets/scripts/stand.js"></script> -->
-	<!-- <script src="./assets/scripts/test.js"></script> -->
+  
 </body>
 </html>

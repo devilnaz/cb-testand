@@ -1,21 +1,22 @@
-const { useToast } = primevue.usetoast;
+const { useToast } = primevue.usetoast; // Для сообщений
 
 const TwoCell = {
   components: {
-    "p-menu": primevue.menu,
-    "p-button": primevue.button,
-    "p-toast": primevue.toast,
-    "p-inputtext": primevue.inputtext,
-    "p-autocomplete": primevue.autocomplete
+    "p-menu":         primevue.menu, // Выпадающее меню
+    "p-button":       primevue.button, // Кнопки
+    "p-autocomplete": primevue.autocomplete // Autocomplete для выбора ветки
   },
   
-  props: ['standsProp', 'testItems'],
+  props: ['standsProp', 'allDataBranch'],
   
   setup(props) {
     
+    // Список с текстом
     const lang = {
       message: {
         error: 'Возникла непредвиденная ошибка, обратитесь к администратору!',
+        backToMaster: 'Ошибка при очистке, обратитесь к администратору!',
+        pull: 'Ошибка при пуле изменений, обратитесь к администратору!',
       }
     };
     
@@ -29,129 +30,115 @@ const TwoCell = {
         label: 'Сброс',
         icon: 'pi pi-refresh',
         command: () => {
-          console.log('сброс');
           onBranchReset();
-          // toast.add({severity:'success', summary:'Updated', detail:'Data Updated', life: 3000});
         }
       },
       {
         label: 'Composer install',
         icon: 'pi pi-times',
         command: () => {
-          console.log('install');
           onComposerInstall();
-          // toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
         }
       },
       {
         label: 'Composer update',
         icon: 'pi pi-times',
         command: () => {
-          console.log('update');
           onComposerUpdate();
-          // toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000});
         }
       }
     ]);
     
+    // Событие кнопки, которая открывает меню
     const toggle = (event) => {
         menu.value.toggle(event);
     };
-    const save = () => {
-        toast.add({severity: 'success', summary: 'Success', detail: 'Data Saved', life: 3000});
-    };
     
-    const selectedCountry1 = Vue.ref();
-    const filteredCountries = Vue.ref();
+    // Выбранная ветка в autocomplete
+    const selectedBranch = Vue.ref();
     
-    const searchCountry = (event) => {
-      
+    // Сформировавшийся список при поиске в autocomplete
+    const filteredAllDataBranch = Vue.ref();
+    
+    // Поиск ветки по списку
+    const searchBranch = (event) => {
         if (!event.query.trim().length) {
-          console.log('first');
-          
-          getAllBranch();
+          filteredAllDataBranch.value = [...props.allDataBranch];
         }
         else {
-          console.log('second');
-          
-          filteredCountries.value = allDataBranch.value.filter((branch) => {
+          filteredAllDataBranch.value = props.allDataBranch.filter((branch) => {
             return branch.name.toLowerCase().startsWith(event.query.toLowerCase());
           });
         }
     };
     
+    // Cтатус ветки
     const statusBranch = Vue.ref(1);
     
-    // Установка статуса при инициализации
+    // Название ветки
+    const linkBranchName = Vue.ref(props.standsProp.data.branch);
+    
+    // Установка при инициализации
     Vue.onMounted(() => {
+      inputHidden(props.standsProp.data.name);
       if (props.standsProp.data.branch !== 'master') {
         statusBranch.value = 3;
-      }
+      };
+      
+      if (linkBranchName.value.includes('testand-')) {
+        linkBranchName.value = linkBranchName.value.replace('testand-', '');
+      };
     });
     
     // Событие главной кнопки для смены состояния
     function changeBranch(event) {
-      // console.log(event.target);
-      
       if (statusBranch.value === 1) {
         statusBranch.value = 2;
+        inputHidden(props.standsProp.data.name);
       } else if (statusBranch.value === 2) {
-        statusBranch.value = 3;
-        onBranchPut();
+        // console.log(selectedBranch.value);
+        // if (linkBranchName.value !== 'master') {
+          
+          onBranchPut();
+        // }
       } else if (statusBranch.value === 3) {
         onBackToMaster();
         statusBranch.value = 1;
       }
-      
-      console.log(statusBranch.value);
     }
     
-    // Хранение всех веток
-    const allDataBranch = Vue.ref([]);
-    
-    // Получение всех веток
-    async function getAllBranch() {
+    function inputHidden (input_id) {
+      if (statusBranch.value === 2) {
+        document.querySelector(`#${input_id}`).style.display = 'block';
+        document.querySelector(`#${input_id} input`).focus();
+      } else {
+        document.querySelector(`#${input_id}`).style.display = 'none';
+      }
+    }
+        
+    // Размещение ветки
+    async function onBranchPut() {
+      linkBranchName.value = selectedBranch.value.name;
+      console.log('selectedBranch.value.name: ', selectedBranch.value.name);
+      
       let data = new FormData();
-      data.append("route", "../tsdb_01");
-      let response = await fetch('https://ts.cbkeys.ru/api/getBranchesDataList.php', {
+      data.append("branch", linkBranchName.value);
+      data.append("route", props.standsProp.data.route);
+      data.append("clear", 0);
+      let response = await fetch('https://ts.cbkeys.ru/api/changeBranch.php', {
         method: "POST",
         body: data
       });
       let result = await response.json();
-      
-      allDataBranch.value = [];
-      // console.log(result.branches);
-      for (let branch of result.branches) {
-        allDataBranch.value.push({
-          name: branch,
-          value: branch,
-        })
-      };
-      // console.log(allDataBranch.value);
-      
-      filteredCountries.value = [...allDataBranch.value];
-    };
-    
-    // Размещение ветки
-    async function onBranchPut() {
-      if (linkBranchName.value !== '') {
-        let data = new FormData();
-        data.append("branch", linkBranchName.value);
-        data.append("route", props.standsProp.data.route);
-        data.append("clear", 0);
-        let response = await fetch('https://ts.cbkeys.ru/api/changeBranch.php', {
-            method: "POST",
-            body: data
-        });
-        let result = await response.json();
-        if(result.ok) {
-            // console.log('result.branch_name: ', result.branch_name);
-            toast.add({ severity: 'success', summary: 'Размещение ветки', detail: 'Успешное размещение ветки', group: 'bl', life: 3000});
-        } else {
-            linkBranchName.value = 'master';
-            statusBranch.value = 1;
-            toast.add({ severity: 'warn', summary: 'Pull ветки', detail: result.error, group: 'bl', life: 10000});
-        }
+      if(result.ok) {
+        statusBranch.value = 3;
+        inputHidden(props.standsProp.data.name);
+        toast.add({ severity: 'success', summary: 'Размещение ветки', detail: 'Успешное размещение!', group: 'bl', life: 3000});
+      } else {
+        linkBranchName.value = 'master';
+        statusBranch.value = 1;
+        inputHidden(props.standsProp.data.name);
+        toast.add({ severity: 'warn', summary: 'Размещение ветки', detail: result.error, group: 'bl', life: 10000});
       }
     }
     
@@ -168,13 +155,12 @@ const TwoCell = {
       });
       
       let result = await response.json();
-      // console.log('onBackToMaster result: ', result);
       
       if(result.ok){
         linkBranchName.value = 'master';
-        console.log('selectedCountry1: ', selectedCountry1);
+        toast.add({ severity: 'success', summary: 'Очистить (до master)', detail: 'Успешно!', group: 'bl', life: 3000});
       } else {
-        alert('Ошибка при очистке, обратитесь к администратору!');
+        toast.add({ severity: 'warn', summary: 'Очистить (до master)', detail: lang.message.backToMaster, group: 'bl', life: 10000});
       }
       
     };
@@ -195,7 +181,7 @@ const TwoCell = {
       if(result.ok){
         toast.add({ severity: 'success', summary: 'Pull ветки', detail: 'Ветка обновлена', group: 'bl', life: 3000});
       } else {
-        toast.add({ severity: 'warn', summary: 'Pull ветки', detail: lang.message.error, group: 'bl', life: 10000});
+        toast.add({ severity: 'warn', summary: 'Pull ветки', detail: lang.message.pull, group: 'bl', life: 10000});
       }
       
     };
@@ -212,10 +198,11 @@ const TwoCell = {
         console.log(result);
         
         if(result.ok){
+          linkBranchName.value = 'master';
           statusBranch.value = 1;
           toast.add({severity:'success', summary:'Сброс ветки', detail: 'Успешно сброшен до master', group: 'bl', life: 3000});
         } else {
-          toast.add({severity:'success', summary:'Сброс ветки', detail: lang.message.error, group: 'bl', life: 10000});
+          toast.add({severity:'warn', summary:'Сброс ветки', detail: lang.message.error, group: 'bl', life: 10000});
         }
     }
     
@@ -233,7 +220,7 @@ const TwoCell = {
         if(result.ok){
           toast.add({severity:'success', summary:'Composer update', detail: 'Успешное обновление', group: 'bl', life: 3000});
         } else {
-          toast.add({severity:'success', summary:'Composer update', detail: lang.message.error, group: 'bl', life: 10000});
+          toast.add({severity:'warn', summary:'Composer update', detail: lang.message.error, group: 'bl', life: 10000});
         }
     }
 
@@ -251,18 +238,18 @@ const TwoCell = {
         if(result.ok){
           toast.add({severity:'success', summary:'Composer install', detail: 'Успешная установка зависимостей', group: 'bl', life: 3000});
         } else {
-          toast.add({severity:'success', summary:'Composer install', detail: lang.message.error, group: 'bl', life: 10000});
+          toast.add({severity:'warn', summary:'Composer install', detail: lang.message.error, group: 'bl', life: 10000});
         }
     }
     
     // Изменение иконки для кнопки
     function changeIcon () {
       if (statusBranch.value === 1) {
-        return 'pi pi-github';
+        return 'fa-solid fa-code-branch';
       } else if (statusBranch.value === 2) {
-        return 'pi pi-angle-double-right';
+        return 'pi pi-arrow-right';
       } else if (statusBranch.value === 3) {
-        return 'pi pi-angle-double-left';
+        return 'pi pi-arrow-left';
       }
     };
     
@@ -270,6 +257,8 @@ const TwoCell = {
     function changeColor () {
       if (statusBranch.value === 2) {
         return 'background-color: var(--blue-400);';
+      } else if (statusBranch.value === 3) {
+        return 'background-color: var(--purple-300);';
       }
     };
     
@@ -286,10 +275,31 @@ const TwoCell = {
     
     // Выбор значения в autocomplete
     function inputSelect (input) {
-      // console.log('select');
-      linkBranchName.value = input.value.name;
-      statusBranch.value === 3;
+      // linkBranchName.value = input.value.name;
+      statusBranch.value = 3;
+      inputHidden(props.standsProp.data.name);
+      onBranchPut();
     }
+    
+    function cancelEvent () {
+      console.log('key event');
+      
+      statusBranch.value = 1;
+      inputHidden(props.standsProp.data.name);
+    }
+    
+    const testFocus = () => {
+      // console.log('focus');
+    }
+    
+    const testHide = () => {
+      // console.log('hide');
+    }
+    
+    const testKey = () => {
+      console.log('keyup');
+    }
+    
     
     // Список стилей
     const styles = Vue.reactive({
@@ -302,18 +312,14 @@ const TwoCell = {
       button: ['stands__btn', 'stands__btn_change'],
     });
     
-    // Состояние названия ветки
-    const linkBranchName = Vue.ref(props.standsProp.data.branch);
-    
-    return { 
+    return {
       linkBranchName,
-      selectedCountry1,
-      filteredCountries,
-      searchCountry,
+      selectedBranch,
+      filteredAllDataBranch,
+      searchBranch,
       items,
       menu,
       toggle,
-      save,
       styles,
       changeBranch,
       changeIcon,
@@ -321,17 +327,16 @@ const TwoCell = {
       changeTitle,
       statusBranch,
       inputSelect,
-      allDataBranch,
       onBackToMaster,
       onBranchPull,
+      testFocus,
+      testHide,
+      testKey,
+      cancelEvent,
     };
   },
   
   template: /*html*/`
-    <!-- Обозначение для отрисовки сообщений -->
-    <p-toast></p-toast>
-    <p-toast position="bottom-left" group="bl"></p-toast>
-    
     <div class="stand__cell">
       <div>
         <a :href="'https://ts.cbkeys.ru/' + standsProp.data.name" :class="[styles.branch, [(statusBranch === 2) ? 'hidden-element' : '']]" target="_blank">
@@ -339,7 +344,15 @@ const TwoCell = {
         </a>
       </div>
       
-      <p-autocomplete @item-select="inputSelect($event)" :class="[(statusBranch === 1 || statusBranch === 3) ? 'hidden-element' : '']" class="p-inputtext-sm" forceSelection v-model="selectedCountry1" :suggestions="filteredCountries" @complete="searchCountry($event)" optionLabel="name"  completeOnFocus="true"></p-autocomplete>
+      <!--
+        autocomplete
+        suggestions - Массив предложений для отображения
+        forceSelection - Очищает поле, если в предложенных нет такого значения
+        scrollHeight - Макс. высота списка
+        delay - Задержка перед предложением вариантов после ввода в input
+      -->
+      
+      <p-autocomplete @keyup.esc="cancelEvent" @keyup.enter="changeBranch" @hide="testHide()" @focus="testFocus()" @item-select="inputSelect($event)" class="p-inputtext-sm w-7 stand__autocomplete" inputClass="w-12 stand__input" v-model="selectedBranch" :suggestions="filteredAllDataBranch" @complete="searchBranch($event)" optionLabel="name"  completeOnFocus="true" placeholder="Выберите ветку" :id="standsProp.data.name" delay="0" scrollHeight="300px"></p-autocomplete>
       
       <div class="stand__buttonset">
         <span class="p-buttonset">
@@ -356,10 +369,10 @@ const TwoCell = {
 
 const Table = {
   components: {
-    'p-datatable': primevue.datatable,
-    'p-column':    primevue.column,
-    'two-cell':    TwoCell,
-    'p-autocomplete': primevue.autocomplete
+    'p-toast':        primevue.toast, // Сообщения
+    'p-datatable':    primevue.datatable, // Таблица
+    'p-column':       primevue.column, // Колонки в связке с таблицей
+    'two-cell':       TwoCell, // Для веток и кнопок
   },
 
   setup() {
@@ -372,7 +385,6 @@ const Table = {
       console.log('result: ', result);
 
       if (result.length > 0) {
-        // console.log(stands);
         stands.value = result.map(stand => {
           return {
             name:   stand.name,
@@ -384,6 +396,7 @@ const Table = {
       }
     });
 
+    // Способ добавления стилей
     const styles = {
       table: [
         'md:w-9',
@@ -392,7 +405,7 @@ const Table = {
       ],
     };
 
-  // Для теста
+    // Вариант по добавлению класса
     const stockClass = (data) => {
       return [
         {
@@ -401,15 +414,45 @@ const Table = {
       ];
     };
     
+    // Хранение всех веток
+    const allDataBranch = Vue.ref([]);
+    
+    Vue.onMounted(getAllBranch);
+    
+    // Получение всех веток
+    async function getAllBranch() {
+      let data = new FormData();
+      data.append("route", "../tsdb_01");
+      let response = await fetch('https://ts.cbkeys.ru/api/getBranchesDataList.php', {
+        method: "POST",
+        body: data
+      });
+      let result = await response.json();
+            
+      for (let branch of result.branches) {
+        allDataBranch.value.push({
+          name: branch,
+          value: branch,
+        })
+      };
+      
+      console.log(allDataBranch.value);
+    };
+    
     return {
       styles,
       stands,
       stockClass,
       input,
+      allDataBranch,
     }
   },
 
   template: /*html*/`
+    <!-- Обозначение для отрисовки сообщений -->
+    <p-toast></p-toast>
+    <p-toast position="bottom-left" group="bl"></p-toast>
+    
     <div :class="styles.table">
       <p-datatable :value="stands" responsive-layout="scroll">
         <p-column field="name" header="Наименование"></p-column>
@@ -422,43 +465,12 @@ const Table = {
         </p-column>
         <p-column header="Ветка">
           <template #body="standProps">
-            <two-cell :stands-prop="standProps, testItems">
+            <two-cell :stands-prop="standProps, allDataBranch">
             </two-cell>
           </template>
         </p-column>
-        
-        
-        
-        <!--<p-column field="branch" header="Ветка">
-          <template #body="standProps">
-            <a :href="standLink(standProps.data)" :class="styles.branch" target="_blank">
-              {{ standProps.data.branch }}
-            </a>
-            <div v-if='input'>input</div>
-            
-            <stand-buttons 
-              @test-ckc='input = !input'
-              :data="standProps.data.name == 'tsdb_03' ? undefined : standProps.data"
-            ></stand-buttons>
-          </template>
-        </p-column>
-        
-        <p-column field="buttons" header="Кнопки">
-          <template #body="standProps">
-            <stand-buttons 
-              @test-ckc='input = !input'
-              :data="standProps.data.name == 'tsdb_03' ? undefined : standProps.data"
-            ></stand-buttons>
-          </template>
-        </p-column>-->
-        
-        
       </p-datatable>
     </div>
-    
-    {{allBranch}}
-    
-    
   `,
 };
 

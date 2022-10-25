@@ -1,0 +1,9 @@
+{
+    "version": 3,
+    "mappings": "AAAA,AAAA,cAAc,CAAC,IAAI,CAAC;EAClB,gBAAgB,EAAE,eAAe;CAClC;;AAED,AAAA,cAAc,CAAC,KAAK,CAAC;EACnB,KAAK,EAAE,eAAe;CACvB",
+    "sources": [
+        "../sass/info-markdown.scss"
+    ],
+    "names": [],
+    "file": "info-markdown.css"
+}

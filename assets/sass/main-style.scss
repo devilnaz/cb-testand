@@ -24,6 +24,11 @@ body {
   &__cell {
     display: flex;
     align-items: center;
+    height: 39px;
+    box-sizing: border-box;
+  }
+  &__input::placeholder {
+    color: var(--surface-200);
   }
   &__buttonset {
     margin-left: auto;
