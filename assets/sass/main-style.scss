@@ -4,14 +4,11 @@ body {
 
 .page {
   &__stands {
-    // max-width: 1000px;
-    // margin: 0px auto;
   }
 }
 
 .stands {
   &__btn {
-
   }
   &__branch-link {
     &:visited {
@@ -21,6 +18,13 @@ body {
 }
 
 .stand {
+  &__row {
+    position: relative;
+  }
+  &__control {
+    width: 67%;
+    
+  }
   &__cell {
     display: flex;
     align-items: center;
@@ -34,7 +38,30 @@ body {
     margin-left: auto;
   }
 }
+
 .p-autocomplete.hidden-element,
 .hidden-element {
   display: none;
+}
+
+.preloader {
+  height: 100%;
+  &__ground {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: rgba(#ce93d8, .35);
+  }
+  &__image-wrapper {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    margin-left: 25px;
+    z-index: 10;
+  }
 }

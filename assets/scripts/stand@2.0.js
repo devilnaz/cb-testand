@@ -17,6 +17,7 @@ const TwoCell = {
         error: 'Возникла непредвиденная ошибка, обратитесь к администратору!',
         backToMaster: 'Ошибка при очистке, обратитесь к администратору!',
         pull: 'Ошибка при пуле изменений, обратитесь к администратору!',
+        pullMaster: 'Нельзя выполнить для ветки master ',
       }
     };
     
@@ -64,8 +65,7 @@ const TwoCell = {
     const searchBranch = (event) => {
         if (!event.query.trim().length) {
           filteredAllDataBranch.value = [...props.allDataBranch];
-        }
-        else {
+        } else {
           filteredAllDataBranch.value = props.allDataBranch.filter((branch) => {
             return branch.name.toLowerCase().startsWith(event.query.toLowerCase());
           });
@@ -80,6 +80,9 @@ const TwoCell = {
     
     // Установка при инициализации
     Vue.onMounted(() => {
+      // if (props.standsProp.data.name == 'tsdb_01') {
+      //   statusPreloader.value = true;
+      // }
       inputHidden(props.standsProp.data.name);
       if (props.standsProp.data.branch !== 'master') {
         statusBranch.value = 3;
@@ -90,36 +93,43 @@ const TwoCell = {
       };
     });
     
+    // Статус Preloader
+    const statusPreloader = Vue.ref(false);
+    
     // Событие главной кнопки для смены состояния
     function changeBranch(event) {
       if (statusBranch.value === 1) {
         statusBranch.value = 2;
         inputHidden(props.standsProp.data.name);
       } else if (statusBranch.value === 2) {
-        // console.log(selectedBranch.value);
-        // if (linkBranchName.value !== 'master') {
-          
-          onBranchPut();
-        // }
+        onBranchPut();
       } else if (statusBranch.value === 3) {
         onBackToMaster();
         statusBranch.value = 1;
       }
     }
     
-    function inputHidden (input_id) {
+    function inputHidden(input_id) {
       if (statusBranch.value === 2) {
-        document.querySelector(`#${input_id}`).style.display = 'block';
+        document.querySelector(`#${input_id}`).style.position = 'relative';
+        document.querySelector(`#${input_id}`).style.visibility = 'visible';
         document.querySelector(`#${input_id} input`).focus();
       } else {
-        document.querySelector(`#${input_id}`).style.display = 'none';
+        document.querySelector(`#${input_id}`).style.position = 'absolute';
+        document.querySelector(`#${input_id}`).style.visibility = 'hidden';
       }
     }
-        
+    
+    function hasInputFocus(event) {
+      event.target.select();
+    }
+    
     // Размещение ветки
     async function onBranchPut() {
+      statusPreloader.value = true;
+      
       linkBranchName.value = selectedBranch.value.name;
-      console.log('selectedBranch.value.name: ', selectedBranch.value.name);
+      // console.log('selectedBranch.value.name: ', selectedBranch.value.name);
       
       let data = new FormData();
       data.append("branch", linkBranchName.value);
@@ -133,17 +143,21 @@ const TwoCell = {
       if(result.ok) {
         statusBranch.value = 3;
         inputHidden(props.standsProp.data.name);
-        toast.add({ severity: 'success', summary: 'Размещение ветки', detail: 'Успешное размещение!', group: 'bl', life: 3000});
+        toast.add({ severity: 'success', summary: 'Размещение ветки', detail: 'Успешное размещение!', group: 'bl', life: 4000});
       } else {
         linkBranchName.value = 'master';
         statusBranch.value = 1;
         inputHidden(props.standsProp.data.name);
-        toast.add({ severity: 'warn', summary: 'Размещение ветки', detail: result.error, group: 'bl', life: 10000});
+        toast.add({ severity: 'warn', summary: 'Размещение ветки', detail: result.error, group: 'bl', life: 4000});
       }
+      
+      statusPreloader.value = false;
     }
     
     // Возвращение на ветку master
     async function onBackToMaster() {
+      statusPreloader.value = true;
+      
       let data = new FormData();
       data.append("branch", 'testand-' + linkBranchName.value);
       data.append("route", props.standsProp.data.route);
@@ -158,88 +172,103 @@ const TwoCell = {
       
       if(result.ok){
         linkBranchName.value = 'master';
-        toast.add({ severity: 'success', summary: 'Очистить (до master)', detail: 'Успешно!', group: 'bl', life: 3000});
+        toast.add({ severity: 'success', summary: 'Очистить (до master)', detail: 'Успешно!', group: 'bl', life: 4000});
       } else {
-        toast.add({ severity: 'warn', summary: 'Очистить (до master)', detail: lang.message.backToMaster, group: 'bl', life: 10000});
+        toast.add({ severity: 'warn', summary: 'Очистить (до master)', detail: lang.message.backToMaster, group: 'bl', life: 4000});
       }
       
+      statusPreloader.value = false;
     };
     
     // Обновление ветки
     async function onBranchPull() {
-      
-      let data = new FormData();
-      data.append("route", props.standsProp.data.route);
-      data.append("branch", linkBranchName.value.indexOf('testand-') === 0 ? linkBranchName.value.replace('testand-', '') : linkBranchName.value);
-      let response = await fetch('https://ts.cbkeys.ru/api/pullStandBranch.php', {
-        method: "POST",
-        body: data
-      });
-      let result = await response.json();
-      console.log('result: ', result);
-      
-      if(result.ok){
-        toast.add({ severity: 'success', summary: 'Pull ветки', detail: 'Ветка обновлена', group: 'bl', life: 3000});
+      if (linkBranchName.value === 'master') {
+        toast.add({ severity: 'warn', summary: 'Pull ветки', detail: lang.message.pullMaster, group: 'bl', life: 4000});
       } else {
-        toast.add({ severity: 'warn', summary: 'Pull ветки', detail: lang.message.pull, group: 'bl', life: 10000});
-      }
+        statusPreloader.value = true;
       
+        let data = new FormData();
+        data.append("route", props.standsProp.data.route);
+        data.append("branch", linkBranchName.value);
+        let response = await fetch('https://ts.cbkeys.ru/api/pullStandBranch.php', {
+          method: "POST",
+          body: data
+        });
+        let result = await response.json();
+        
+        if(result.ok){
+          toast.add({ severity: 'success', summary: 'Pull ветки', detail: 'Ветка обновлена', group: 'bl', life: 4000});
+        } else {
+          toast.add({ severity: 'warn', summary: 'Pull ветки', detail: lang.message.pull, group: 'bl', life: 4000});
+        }
+        
+        statusPreloader.value = false;
+      }
     };
     
     // Принудительный сброс до master
     async function onBranchReset() {
-        let data = new FormData();
-        data.append("route", props.standsProp.data.route);
-        let response = await fetch('https://ts.cbkeys.ru/api/hardReset.php', {
-            method: "POST",
-            body: data
-        });
-        let result = await response.json();
-        console.log(result);
-        
-        if(result.ok){
-          linkBranchName.value = 'master';
-          statusBranch.value = 1;
-          toast.add({severity:'success', summary:'Сброс ветки', detail: 'Успешно сброшен до master', group: 'bl', life: 3000});
-        } else {
-          toast.add({severity:'warn', summary:'Сброс ветки', detail: lang.message.error, group: 'bl', life: 10000});
-        }
+      statusPreloader.value = true;
+    
+      let data = new FormData();
+      data.append("route", props.standsProp.data.route);
+      let response = await fetch('https://ts.cbkeys.ru/api/hardReset.php', {
+          method: "POST",
+          body: data
+      });
+      let result = await response.json();
+      
+      if(result.ok){
+        linkBranchName.value = 'master';
+        statusBranch.value = 1;
+        toast.add({severity:'success', summary:'Сброс ветки', detail: 'Успешно сброшен до master', group: 'bl', life: 4000});
+      } else {
+        toast.add({severity:'warn', summary:'Сброс ветки', detail: lang.message.error, group: 'bl', life: 4000});
+      }
+      
+      statusPreloader.value = false;
     }
     
     // Обновление composer
     async function onComposerUpdate () {
-        let data = new FormData();
-        data.append("route", props.standsProp.data.route);
-        let response = await fetch('https://ts.cbkeys.ru/api/composerUpdate.php', {
-            method: "POST",
-            body: data
-        });
-        let result = await response.json();
-        console.log(result.log);
-        
-        if(result.ok){
-          toast.add({severity:'success', summary:'Composer update', detail: 'Успешное обновление', group: 'bl', life: 3000});
-        } else {
-          toast.add({severity:'warn', summary:'Composer update', detail: lang.message.error, group: 'bl', life: 10000});
-        }
+      statusPreloader.value = true;
+    
+      let data = new FormData();
+      data.append("route", props.standsProp.data.route);
+      let response = await fetch('https://ts.cbkeys.ru/api/composerUpdate.php', {
+          method: "POST",
+          body: data
+      });
+      let result = await response.json();
+      
+      if(result.ok){
+        toast.add({severity:'success', summary:'Composer update', detail: 'Успешное обновление', group: 'bl', life: 4000});
+      } else {
+        toast.add({severity:'warn', summary:'Composer update', detail: lang.message.error, group: 'bl', life: 4000});
+      }
+      
+      statusPreloader.value = false;
     }
 
     // Установка/обновление зависимостей в composer
     async function onComposerInstall () {
-        let data = new FormData();
-        data.append("route", props.standsProp.data.route);
-        let response = await fetch('https://ts.cbkeys.ru/api/composerInstall.php', {
-            method: "POST",
-            body: data
-        });
-        let result = await response.json();
-        console.log(result.log);
-        
-        if(result.ok){
-          toast.add({severity:'success', summary:'Composer install', detail: 'Успешная установка зависимостей', group: 'bl', life: 3000});
-        } else {
-          toast.add({severity:'warn', summary:'Composer install', detail: lang.message.error, group: 'bl', life: 10000});
-        }
+      statusPreloader.value = true;
+    
+      let data = new FormData();
+      data.append("route", props.standsProp.data.route);
+      let response = await fetch('https://ts.cbkeys.ru/api/composerInstall.php', {
+          method: "POST",
+          body: data
+      });
+      let result = await response.json();
+      
+      if(result.ok){
+        toast.add({severity:'success', summary:'Composer install', detail: 'Успешная установка зависимостей', group: 'bl', life: 4000});
+      } else {
+        toast.add({severity:'warn', summary:'Composer install', detail: lang.message.error, group: 'bl', life: 4000});
+      }
+      
+      statusPreloader.value = false;
     }
     
     // Изменение иконки для кнопки
@@ -275,32 +304,16 @@ const TwoCell = {
     
     // Выбор значения в autocomplete
     function inputSelect (input) {
-      // linkBranchName.value = input.value.name;
       statusBranch.value = 3;
       inputHidden(props.standsProp.data.name);
       onBranchPut();
     }
     
     function cancelEvent () {
-      console.log('key event');
-      
       statusBranch.value = 1;
       inputHidden(props.standsProp.data.name);
     }
-    
-    const testFocus = () => {
-      // console.log('focus');
-    }
-    
-    const testHide = () => {
-      // console.log('hide');
-    }
-    
-    const testKey = () => {
-      console.log('keyup');
-    }
-    
-    
+        
     // Список стилей
     const styles = Vue.reactive({
       branch: [
@@ -329,10 +342,9 @@ const TwoCell = {
       inputSelect,
       onBackToMaster,
       onBranchPull,
-      testFocus,
-      testHide,
-      testKey,
+      hasInputFocus,
       cancelEvent,
+      statusPreloader,
     };
   },
   
@@ -343,6 +355,12 @@ const TwoCell = {
           {{ linkBranchName }}
         </a>
       </div>
+      <div class="preloader" v-if="statusPreloader">
+        <div class="preloader__ground"></div>
+        <div class="preloader__image-wrapper">
+          <i class="preloader__image pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+        </div>
+      </div>
       
       <!--
         autocomplete
@@ -350,9 +368,10 @@ const TwoCell = {
         forceSelection - Очищает поле, если в предложенных нет такого значения
         scrollHeight - Макс. высота списка
         delay - Задержка перед предложением вариантов после ввода в input
+        completeOnFocus - Открывает список при получении фокуса
       -->
       
-      <p-autocomplete @keyup.esc="cancelEvent" @keyup.enter="changeBranch" @hide="testHide()" @focus="testFocus()" @item-select="inputSelect($event)" class="p-inputtext-sm w-7 stand__autocomplete" inputClass="w-12 stand__input" v-model="selectedBranch" :suggestions="filteredAllDataBranch" @complete="searchBranch($event)" optionLabel="name"  completeOnFocus="true" placeholder="Выберите ветку" :id="standsProp.data.name" delay="0" scrollHeight="300px"></p-autocomplete>
+      <p-autocomplete @keyup.esc="cancelEvent" @keyup.enter="changeBranch" @focus="hasInputFocus($event)" @item-select="inputSelect($event)" class="p-inputtext-sm w-7 stand__autocomplete" inputClass="w-12 stand__input" v-model="selectedBranch" :suggestions="filteredAllDataBranch" @complete="searchBranch($event)" optionLabel="name"  completeOnFocus="true" placeholder="Выберите ветку" :id="standsProp.data.name" delay="0" scrollHeight="300px"></p-autocomplete>
       
       <div class="stand__buttonset">
         <span class="p-buttonset">
@@ -369,10 +388,10 @@ const TwoCell = {
 
 const Table = {
   components: {
-    'p-toast':        primevue.toast, // Сообщения
-    'p-datatable':    primevue.datatable, // Таблица
-    'p-column':       primevue.column, // Колонки в связке с таблицей
-    'two-cell':       TwoCell, // Для веток и кнопок
+    'p-toast':     primevue.toast, // Сообщения
+    'p-datatable': primevue.datatable, // Таблица
+    'p-column':    primevue.column, // Колонки в связке с таблицей
+    'two-cell':    TwoCell, // Для веток и кнопок
   },
 
   setup() {
@@ -382,7 +401,6 @@ const Table = {
     Vue.onMounted(async () => {
       let response = await fetch('https://ts.cbkeys.ru/api/getStandsInfo.php');
       let result = await response.json();
-      console.log('result: ', result);
 
       if (result.length > 0) {
         stands.value = result.map(stand => {
@@ -436,8 +454,12 @@ const Table = {
         })
       };
       
-      console.log(allDataBranch.value);
+      // console.log(allDataBranch.value);
     };
+    
+    function setRowClass() {
+      return 'stand__row';
+    }
     
     return {
       styles,
@@ -445,6 +467,7 @@ const Table = {
       stockClass,
       input,
       allDataBranch,
+      setRowClass
     }
   },
 
@@ -454,7 +477,7 @@ const Table = {
     <p-toast position="bottom-left" group="bl"></p-toast>
     
     <div :class="styles.table">
-      <p-datatable :value="stands" responsive-layout="scroll">
+      <p-datatable :value="stands" responsive-layout="scroll" :rowClass="setRowClass">
         <p-column field="name" header="Наименование"></p-column>
         <p-column field="master" header="Master">
           <template #body="standProps">
@@ -463,7 +486,7 @@ const Table = {
             </div>
           </template>
         </p-column>
-        <p-column header="Ветка">
+        <p-column header="Ветка" class="stand__control">
           <template #body="standProps">
             <two-cell :stands-prop="standProps, allDataBranch">
             </two-cell>
