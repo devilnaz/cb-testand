@@ -2,21 +2,6 @@ body {
   margin: 0;
 }
 
-.page {
-  &__stands {
-  }
-}
-
-.stands {
-  &__btn {
-  }
-  &__branch-link {
-    &:visited {
-      color: var(--purple-300) !important;
-    }
-  }
-}
-
 .stand {
   &__row {
     position: relative;

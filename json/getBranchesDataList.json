@@ -1,0 +1,12 @@
+{
+  "branches": 
+    [
+      "87456-fix-popup",
+      "87945-upgrade-wazzup-view-messages",
+      "86486-bugfix-calculation-template",
+      "86491-revision-notification-dice",
+      "86123-revision-flashing-reminders",
+      "86070-bugfix-user-access"
+    ]
+  
+}

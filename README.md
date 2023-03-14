@@ -9,28 +9,6 @@
     composer install
 ```
 
-### При первом запуске проекта необходимо создать файл config/config.json
+### Чтобы изменить блок "информация по стендам" 
 
-Пример:
-```
-{
-    "root": "../",
-    "masters": {
-        "ts_01": "master",
-        "ts_02": "master",
-        "ts_03": "master",
-        "ts_04": "master",
-        "ts_05": "master",
-        "ts_06": "master",
-        "ts_marat_01": "master",
-        "ts_marat_02": "master",
-        "tsdb_01": "master",
-        "tsdb_02": "master",
-        "tsdb_03": "master",
-        "tsdb_cron_01": "master",
-        "tsdb_cron_02": "master"
-    }
-}
-```
-
-### Чтобы добавить информацию по стендам перейдите в info/markdown.md
+Необходимо перейти в info/markdown.md

@@ -1,9 +1,1 @@
-{
-    "version": 3,
-    "mappings": "AAAA,AAAA,cAAc,CAAC,IAAI,AAAC,CAClB,gBAAgB,CAAE,eAAe,CAClC,AAED,AAAA,cAAc,CAAC,KAAK,AAAC,CACnB,KAAK,CAAE,eAAe,CACvB",
-    "sources": [
-        "../sass/info-markdown.scss"
-    ],
-    "names": [],
-    "file": "info-markdown.min.css"
-}
+{"version":3,"sources":["../sass/info-markdown.scss"],"names":[],"mappings":"AAAA,oBACE,gCAAA,CAGF,qBACE,qBAAA","file":"info-markdown.min.css"}

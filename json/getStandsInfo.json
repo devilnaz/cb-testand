@@ -1,0 +1,44 @@
+[
+  {
+    "name": "ts_01",
+    "master": "master",
+    "route": "../ts_01",
+    "branch": "master"
+  },
+  {
+    "name": "ts_02",
+    "master": "master",
+    "route": "../ts_02",
+    "branch": "master"
+  },
+  {
+    "name": "ts_03",
+    "master": "master",
+    "route": "../ts_03",
+    "branch": "86486-bugfix-calculation-template"
+  },
+  {
+    "name": "tsdb_01",
+    "master": "master",
+    "route": "../tsdb_01",
+    "branch": "master"
+  },
+  {
+    "name": "tsdb_02",
+    "master": "master",
+    "route": "../tsdb_02",
+    "branch": "86123-revision-flashing-reminders"
+  },
+  {
+    "name": "tsdb_cron_01",
+    "master": "master",
+    "route": "../tsdb_cron_01",
+    "branch": "master"
+  },
+  {
+    "name": "tsdb_cron_02",
+    "master": "master",
+    "route": "../tsdb_cron_02",
+    "branch": "master"
+  }
+]
