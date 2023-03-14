@@ -198,7 +198,7 @@ const TwoCell = {
       });
       let result = await response.json(); */
       
-      let response = await fetch('../../json/changeBranch.json');
+      let response = await fetch('./../../json/changeBranch.json');
       let result = await response.json();
       
       hideInput(props.standsProp.data.name);
@@ -233,7 +233,7 @@ const TwoCell = {
       
       let result = await response.json(); */
       
-      let response = await fetch('../../json/changeBranch.json');
+      let response = await fetch('./../../json/changeBranch.json');
       let result = await response.json();
       
       if (result.ok) {
@@ -264,7 +264,7 @@ const TwoCell = {
         });
         let result = await response.json(); */
         
-        let response = await fetch('../../json/changeBranch.json');
+        let response = await fetch('./../../json/changeBranch.json');
         let result = await response.json();
         
         if (result.ok) {
@@ -292,7 +292,7 @@ const TwoCell = {
       });
       let result = await response.json(); */
       
-      let response = await fetch('../../json/changeBranch.json');
+      let response = await fetch('./../../json/changeBranch.json');
       let result = await response.json();
       
       if (result.ok) {
@@ -319,7 +319,7 @@ const TwoCell = {
       });
       let result = await response.json(); */
       
-      let response = await fetch('../../json/changeBranch.json');
+      let response = await fetch('./../../json/changeBranch.json');
       let result = await response.json();
       
       if (checkStatus() === 2) {
@@ -349,7 +349,7 @@ const TwoCell = {
       });
       let result = await response.json(); */
       
-      let response = await fetch('../../json/changeBranch.json');
+      let response = await fetch('./../../json/changeBranch.json');
       let result = await response.json();
       
       if (checkStatus() === 2) {
@@ -496,7 +496,7 @@ const Table = {
       // let response = await fetch('../../api/getStandsInfo.php');
       // let result = await response.json();
       
-      let response = await fetch('../../json/getStandsInfo.json');
+      let response = await fetch('./../../json/getStandsInfo.json');
       let result = await response.json();
       
       if (result.length > 0) {
@@ -546,7 +546,7 @@ const Table = {
       });
       let result = await response.json(); */
       
-      let response = await fetch('../../json/getBranchesDataList.json');
+      let response = await fetch('./../../json/getBranchesDataList.json');
       let result = await response.json();
       
       for (let branch of result.branches) {
